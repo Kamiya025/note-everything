@@ -318,6 +318,10 @@
     position: relative;
   }
 
+  .sticky {
+    position: sticky;
+  }
+
   .m-0 {
     margin: 0;
   }

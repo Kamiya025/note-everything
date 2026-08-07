@@ -1,77 +1,66 @@
-# React + TypeScript + Vite
+# Note Everything - Wall of Notes
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to **Note Everything**, a beautiful, interactive digital sticky note wall where anyone can leave a note! 
 
-Currently, two official plugins are available:
+Built with the modern web stack, this project features real-time updates, glassmorphism design, and a fun interactive experience.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✨ Features
 
-## React Compiler
+- **Interactive Wall**: A dynamic, beautiful wall where notes look like real sticky notes.
+- **Real-time Updates**: Powered by Supabase Realtime, notes appear instantly for all users viewing the wall.
+- **Telegram Integration**: 
+  - **Notifications**: Get notified on Telegram whenever someone leaves a note.
+  - **Create via Bot**: Send a message directly to your Telegram Bot, and it will automatically be posted on the wall!
+- **Modern Design**: Built with Tailwind CSS v4, featuring aesthetic backgrounds, glass panels, and smooth animations.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## 🛠️ Tech Stack
 
-Note: This will impact Vite dev & build performances.
+- **Framework**: [Next.js 15+ (App Router)](https://nextjs.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Database & Realtime**: [Supabase](https://supabase.com/)
+- **State Management**: [React Query](https://tanstack.com/query/latest)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+### 1. Clone & Install
+```bash
+git clone <your-repo-url>
+cd note-everything
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Environment Variables
+Create a `.env.local` file in the root directory and add the following keys:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+# Telegram Bot Configuration (Optional)
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_chat_id
 ```
+
+### 3. Run the Development Server
+```bash
+pnpm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 🤖 Telegram Bot Webhook Setup (Local Development)
+
+To allow the Telegram Bot to receive messages and create notes on your local machine, you need to expose your local server to the internet using **ngrok**:
+
+1. Install and start ngrok on port 3000:
+```bash
+ngrok http 3000
+```
+2. Copy the `https` Forwarding URL provided by ngrok (e.g., `https://<your-id>.ngrok-free.app`).
+3. Open your browser and register the webhook with Telegram by replacing `<YOUR_BOT_TOKEN>` and `<YOUR_NGROK_URL>` in this URL:
+```
+https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook?url=<YOUR_NGROK_URL>/api/telegram/webhook
+```
+4. If successful, you will see `{"ok":true,"result":true,"description":"Webhook was set"}`. 
+5. Try sending a message to your bot on Telegram!
