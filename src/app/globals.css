@@ -1,0 +1,695 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-color: #0f172a; /* Slate 900 */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --accent: #8b5cf6; /* Violet 500 */
+  --accent-hover: #7c3aed; /* Violet 600 */
+  --error: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  color: #1e293b;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  /* Vietnamese Old Yellow Wall Background */
+  background-image: url('/bg-wall.png');
+  background-size: cover;
+  background-position: center;
+  background-color: #eab308; /* Fallback yellow */
+  overflow: hidden;
+}
+
+/* App Container */
+.app-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+main > section {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+/* Wooden Hanging Sign */
+.header-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  padding-top: 40px; /* Space for the strings */
+  margin-bottom: 0.5rem;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.hanging-sign {
+  background: #5c3a21; /* Fallback dark wood color */
+  background-image: url('/bg-wood.png');
+  background-size: cover;
+  background-position: center;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.8);
+  border: 3px solid #3e1f06;
+  position: relative;
+  text-align: center;
+  transform-origin: top center;
+  animation: swing 6s ease-in-out infinite;
+}
+
+/* The strings */
+.hanging-sign::before,
+.hanging-sign::after {
+  content: '';
+  position: absolute;
+  top: -40px; /* Length of string */
+  width: 4px;
+  height: 40px;
+  background: #d2b48c; /* Rope color */
+  box-shadow: 2px 0 3px rgba(0,0,0,0.5);
+  /* Rope texture */
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.3) 3px,
+    rgba(0,0,0,0.3) 6px
+  );
+  z-index: -1;
+}
+
+.hanging-sign::before {
+  left: 40px;
+}
+.hanging-sign::after {
+  right: 40px;
+}
+
+@keyframes swing {
+  0% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+  100% { transform: rotate(-2deg); }
+}
+
+.hanging-sign h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fef08a; /* Yellow paint */
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+  margin-bottom: 0;
+  letter-spacing: -1px;
+  font-family: 'Chalkboard SE', 'Marker Felt', 'Comic Sans MS', sans-serif;
+}
+
+.hanging-sign p {
+  color: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.9);
+  margin: 0;
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styles */
+.note-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.glass-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+textarea.glass-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Sticky Input for handwritten form */
+.sticky-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.3);
+  border-radius: 0;
+  padding: 0.5rem 0;
+  color: #334155;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.sticky-input:focus {
+  border-bottom-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.2);
+}
+textarea.sticky-input {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.5;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Submit Button for Sticky Note */
+.submit-button {
+  background: #334155;
+  color: white;
+  border: 2px solid #1e293b;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Outfit', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  width: 100%;
+  border-radius: 2px 10px 10px 2px;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #1e293b;
+  transform: translateY(-2px) rotate(-1deg);
+  box-shadow: 2px 6px 15px rgba(0,0,0,0.2);
+}
+
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Color Picker Buttons */
+.color-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
+}
+
+.color-btn.selected {
+  border-color: #334155;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.8), 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.color-input {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  background: none;
+}
+
+.color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-input::-webkit-color-swatch {
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 50%;
+}
+
+/* Close Button (Marker style) */
+.close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: rotate(90deg) scale(1.2);
+}
+.close-icon {
+  font-family: 'Comic Sans MS', 'Marker Felt', 'Chalkboard SE', sans-serif;
+  font-size: 1.8rem;
+  color: #ef4444; /* Red marker color */
+  line-height: 1;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+
+/* Freeform Floating Wall */
+.wall-container {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+/* Base floating animation */
+@keyframes floatAnimation {
+  0% { transform: rotate(var(--base-rotate)) translateY(0px); }
+  50% { transform: rotate(var(--base-rotate)) translateY(-15px); }
+  100% { transform: rotate(var(--base-rotate)) translateY(0px); }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Skeleton Loading */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.skeleton-note {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.skeleton-line {
+  background: rgba(0, 0, 0, 0.1);
+  height: 1.2rem;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+/* Note Card - Sticky Note Style */
+.note-card {
+  position: absolute;
+  width: 280px;
+  max-width: 90vw;
+  padding: 1.5rem;
+  transition: box-shadow 0.3s ease, z-index 0s, transform 0.3s ease;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.15),
+              inset 0 -20px 20px -20px rgba(0,0,0,0.1),
+              inset 0 20px 20px -20px rgba(255,255,255,0.6);
+  color: #1e293b; 
+  /* Fallback to handwriting-like fonts for notes */
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Outfit', sans-serif; 
+  border-radius: 2px 2px 25px 5px; /* Curl effect on bottom right */
+  background-image: url('/paper-texture.png');
+  background-size: cover;
+  background-blend-mode: multiply;
+}
+
+/* Override glass-panel for note cards so they are solid */
+.note-card.glass-panel {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+}
+
+/* Tape effect at the top */
+.note-card::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 100px;
+  height: 32px;
+  background-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.5);
+  border-left: 2px dashed rgba(255, 255, 255, 0.5);
+  border-right: 2px dashed rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 5;
+}
+
+/* Floating state */
+.floating-note {
+  animation: floatAnimation 6s ease-in-out infinite;
+}
+
+.floating-note:hover, .note-card:hover {
+  transform: rotate(0deg) scale(1.1) translateY(-10px) !important;
+  box-shadow: 4px 20px 30px rgba(0, 0, 0, 0.4);
+  z-index: 1000 !important;
+  animation-play-state: paused;
+}
+
+/* Realistic curl shadow */
+.note-card::before {
+  content: '';
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 50%;
+  height: 20px;
+  box-shadow: 0 15px 12px rgba(0, 0, 0, 0.25);
+  transform: rotate(4deg);
+  z-index: -1;
+}
+
+/* Pastel solid colors for sticky notes */
+.note-card[data-color="pink"] { background: #fecdd3; }
+.note-card[data-color="blue"] { background: #bae6fd; }
+.note-card[data-color="green"] { background: #bbf7d0; }
+.note-card[data-color="yellow"] { background: #fef08a; }
+.note-card[data-color="purple"] { background: #e9d5ff; }
+
+.note-content {
+  font-size: 1.15rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  color: #334155;
+  margin-top: 10px; /* Space for tape */
+}
+
+.note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #64748b;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 0.75rem;
+  margin-top: auto;
+}
+
+/* Form Sticky Note Style */
+.form-sticky-note {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-shadow: 2px 8px 20px rgba(0, 0, 0, 0.15),
+              inset 0 -30px 30px -30px rgba(0,0,0,0.1),
+              inset 0 30px 30px -30px rgba(255,255,255,0.6);
+  color: #1e293b; 
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Outfit', sans-serif; 
+  border-radius: 2px 2px 25px 5px;
+  transition: background-color 0.3s ease;
+  background-image: url('/paper-texture.png');
+  background-size: cover;
+  background-blend-mode: multiply;
+}
+
+.form-sticky-note::after {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 130px;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.5);
+  border-left: 2px dashed rgba(255, 255, 255, 0.5);
+  border-right: 2px dashed rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 5;
+}
+
+/* Realistic curl shadow for form */
+.form-sticky-note::before {
+  content: '';
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 50%;
+  height: 20px;
+  box-shadow: 0 18px 15px rgba(0, 0, 0, 0.3);
+  transform: rotate(4deg);
+  z-index: -1;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+/* Stack of sticky notes FAB */
+.sticky-stack-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 90px;
+  height: 90px;
+  background-image: url('/sticky-stack.png');
+  background-size: cover;
+  background-position: center;
+  background-color: white;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 24px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 90;
+  transition: transform 0.2s;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sticky-stack-fab:hover {
+  transform: scale(1.05) translate(-2px, -2px);
+}
+
+.top-note {
+  position: absolute;
+  top: 15%;
+  left: 15%;
+  width: 70%;
+  height: 70%;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-origin: bottom left;
+  border-radius: 2px 2px 15px 2px;
+}
+
+/* Tear animation to center of screen */
+@keyframes tearOff {
+  0% {
+    transform: rotate(0deg) scale(1) translate(0, 0);
+    opacity: 1;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 2px 2px 15px 2px;
+  }
+  1% {
+    background: #fef08a;
+    background-image: url('/paper-texture.png');
+    background-size: cover;
+    background-blend-mode: multiply;
+    box-shadow: inset 0 -2px 5px -2px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
+  }
+  20% {
+    transform: rotate(-10deg) scale(1.2) translate(-5px, -10px);
+    border-radius: 2px 2px 25px 5px; /* Curl more */
+    background: #fef08a;
+    background-image: url('/paper-texture.png');
+    background-size: cover;
+    background-blend-mode: multiply;
+    box-shadow: inset 0 -2px 5px -2px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
+  }
+  100% {
+    /* Scale up and move to center. At scale 5, -8vw = -40vw */
+    transform: rotate(0deg) scale(5) translate(-8vw, -8vh);
+    opacity: 0;
+    background: #fef08a;
+    background-image: url('/paper-texture.png');
+    background-size: cover;
+    background-blend-mode: multiply;
+  }
+}
+
+.top-note.tearing {
+  animation: tearOff 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  z-index: 100;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .sticky-stack-fab {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+}
+
+
+.note-author {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Setup Screen */
+.setup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.setup-card {
+  max-width: 500px;
+  text-align: center;
+}
+
+.setup-card h2 {
+  margin-bottom: 1rem;
+  color: #fbbf24;
+}
+
+.setup-card p {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.setup-card code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  color: #fbbf24;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
