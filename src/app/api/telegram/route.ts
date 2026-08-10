@@ -19,9 +19,19 @@ export async function POST(request: Request) {
     };
 
     let message = '';
+    let reply_markup: any = undefined;
+    const origin = request.headers.get('origin') || new URL(request.url).origin;
+
     if (body.type === 'note') {
-      const origin = request.headers.get('origin') || new URL(request.url).origin;
-      message = `📝 <b>Ghi chú mới trên Wall of Notes!</b>\n\n👤 <b>Người gửi:</b> ${escapeHtml(body.author)}\n💬 <b>Nội dung:</b> ${escapeHtml(body.content)}\n\n🌐 <a href="${origin}">Xem trên Web</a>`;
+      message = `📝 <b>Ghi chú mới trên Wall of Notes!</b>\n\n👤 <b>Người gửi:</b> ${escapeHtml(body.author)}\n💬 <b>Nội dung:</b> ${escapeHtml(body.content)}`;
+      reply_markup = {
+        inline_keyboard: [
+          [
+            { text: "🌐 Xem trên Web", url: origin },
+            { text: "📢 Chia sẻ", url: `https://t.me/share/url?url=${encodeURIComponent(origin)}&text=${encodeURIComponent("Ghi chú mới trên Wall of Notes!")}` }
+          ]
+        ]
+      };
     } else if (body.type === 'visitor') {
       const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'Unknown IP';
       const country = request.headers.get('x-vercel-ip-country') || 'Unknown Country';
@@ -35,6 +45,14 @@ export async function POST(request: Request) {
                 `🖥️ <b>Màn hình:</b> ${escapeHtml(body.screen)}\n` +
                 `🗣️ <b>Ngôn ngữ:</b> ${escapeHtml(body.language)}\n` +
                 `💻 <b>Thiết bị:</b> <code>${escapeHtml(body.userAgent)}</code>`;
+                
+      reply_markup = {
+        inline_keyboard: [
+          [
+            { text: "🌐 Truy cập Web", url: origin }
+          ]
+        ]
+      };
     }
 
     if (!message) {
@@ -50,6 +68,7 @@ export async function POST(request: Request) {
         chat_id: chatId,
         text: message,
         parse_mode: 'HTML',
+        reply_markup: reply_markup,
       }),
     });
 
