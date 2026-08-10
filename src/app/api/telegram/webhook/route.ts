@@ -13,18 +13,25 @@ export async function POST(request: Request) {
       const chatId = body.message.chat?.id;
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
 
-      const sendTelegramMessage = async (msg: string) => {
+      const sendTelegramMessage = async (msg: string, replyMarkup?: any) => {
         if (!botToken || !chatId) return;
+        
+        const payload: any = {
+          chat_id: chatId,
+          text: msg,
+          parse_mode: 'HTML'
+        };
+        
+        if (replyMarkup) {
+          payload.reply_markup = replyMarkup;
+        }
+
         await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: msg,
-            parse_mode: 'HTML'
-          }),
+          body: JSON.stringify(payload),
         });
       };
 
@@ -116,26 +123,29 @@ export async function POST(request: Request) {
           console.error('Error inserting note from Telegram:', error);
           await sendTelegramMessage(`❌ Error posting note to the wall.`);
         } else {
+          const origin = request.headers.get('origin') || new URL(request.url).origin;
+          const escapeHtml = (str: string) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          
+          const reply_markup = {
+            inline_keyboard: [
+              [
+                { text: "🌐 View on Web", url: origin },
+                { text: "📢 Share", url: `https://t.me/share/url?url=${encodeURIComponent(origin)}&text=${encodeURIComponent("New note on Wall of Notes!")}` }
+              ]
+            ]
+          };
+
           // Send confirmation message back to the user
-          await sendTelegramMessage(`✅ Your note has been pinned to the wall!\n\n"${cleanContent}"`);
+          await sendTelegramMessage(
+            `✅ Your note has been pinned to the wall!\n\n"${cleanContent}"`,
+            reply_markup
+          );
 
           // Send notification to the group
           const groupChatId = process.env.TELEGRAM_CHAT_ID;
           if (groupChatId && groupChatId !== chatId.toString()) {
-            const origin = request.headers.get('origin') || new URL(request.url).origin;
-            const escapeHtml = (str: string) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const groupMessage = `📝 <b>New note on Wall of Notes!</b>\n\n👤 <b>Sender:</b> ${escapeHtml(author)} (via Bot)\n💬 <b>Content:</b> ${escapeHtml(cleanContent)}`;
             
-            const groupMessage = `📝 <b>Ghi chú mới trên Wall of Notes!</b>\n\n👤 <b>Người gửi:</b> ${escapeHtml(author)} (via Bot)\n💬 <b>Nội dung:</b> ${escapeHtml(cleanContent)}`;
-            
-            const reply_markup = {
-              inline_keyboard: [
-                [
-                  { text: "🌐 Xem trên Web", url: origin },
-                  { text: "📢 Chia sẻ", url: `https://t.me/share/url?url=${encodeURIComponent(origin)}&text=${encodeURIComponent("Ghi chú mới trên Wall of Notes!")}` }
-                ]
-              ]
-            };
-
             await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
