@@ -65,10 +65,13 @@ export async function POST(request: Request) {
               const { data, error } = await supabase
                 .from('notes')
                 .select('content, author')
-                .order('created_at', { ascending: false })
+                .order('createdAt', { ascending: false })
                 .limit(50);
                 
-              if (data && data.length > 0) {
+              if (error) {
+                console.error('Error fetching random note:', error);
+                await sendTelegramMessage(`❌ Error fetching notes.`);
+              } else if (data && data.length > 0) {
                 const randomNote = data[Math.floor(Math.random() * data.length)];
                 await sendTelegramMessage(`🎲 <b>Random Note:</b>\n\n👤 <b>By:</b> ${randomNote.author}\n💬 <b>Content:</b> ${randomNote.content}`);
               } else {
@@ -115,6 +118,35 @@ export async function POST(request: Request) {
         } else {
           // Send confirmation message back to the user
           await sendTelegramMessage(`✅ Your note has been pinned to the wall!\n\n"${cleanContent}"`);
+
+          // Send notification to the group
+          const groupChatId = process.env.TELEGRAM_CHAT_ID;
+          if (groupChatId && groupChatId !== chatId.toString()) {
+            const origin = request.headers.get('origin') || new URL(request.url).origin;
+            const escapeHtml = (str: string) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            const groupMessage = `📝 <b>Ghi chú mới trên Wall of Notes!</b>\n\n👤 <b>Người gửi:</b> ${escapeHtml(author)} (via Bot)\n💬 <b>Nội dung:</b> ${escapeHtml(cleanContent)}`;
+            
+            const reply_markup = {
+              inline_keyboard: [
+                [
+                  { text: "🌐 Xem trên Web", url: origin },
+                  { text: "📢 Chia sẻ", url: `https://t.me/share/url?url=${encodeURIComponent(origin)}&text=${encodeURIComponent("Ghi chú mới trên Wall of Notes!")}` }
+                ]
+              ]
+            };
+
+            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: groupChatId,
+                text: groupMessage,
+                parse_mode: 'HTML',
+                reply_markup: reply_markup
+              })
+            });
+          }
         }
       }
     }
