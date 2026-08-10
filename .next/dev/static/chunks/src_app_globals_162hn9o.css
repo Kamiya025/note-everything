@@ -896,13 +896,63 @@ textarea.sticky-input {
   overflow: hidden;
 }
 
-@keyframes floatAnimation {
+@keyframes slapOnWall {
+  0% {
+    transform: translateY(calc(-60px - 8vh))
+      rotate(calc(var(--base-rotate) + var(--entry-spin, 25deg)))
+      scale(.85);
+    opacity: 0;
+    box-shadow: 0 2px 6px #0000001a;
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  55% {
+    transform: translateY(0px)
+      rotate(var(--base-rotate))
+      scale(1);
+    box-shadow: 2px 4px 10px #00000026, inset 0 -20px 20px -20px #0000001a, inset 0 20px 20px -20px #fff9;
+  }
+
+  68% {
+    transform: translateY(-4px)
+      rotate(calc(var(--base-rotate) + var(--wobble-dir, 1) * 4deg))
+      scale(1.01);
+  }
+
+  80% {
+    transform: translateY(1px)
+      rotate(calc(var(--base-rotate) - var(--wobble-dir, 1) * 2deg))
+      scale(.995);
+  }
+
+  91% {
+    transform: translateY(-1px)
+      rotate(calc(var(--base-rotate) + var(--wobble-dir, 1) * .8deg))
+      scale(1);
+  }
+
+  100% {
+    transform: translateY(0px)
+      rotate(var(--base-rotate))
+      scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pinnedSway {
   0% {
     transform: rotate(var(--base-rotate)) translateY(0px);
   }
 
-  50% {
-    transform: rotate(var(--base-rotate)) translateY(-15px);
+  30% {
+    transform: rotate(calc(var(--base-rotate) + .4deg)) translateY(-1.5px);
+  }
+
+  65% {
+    transform: rotate(calc(var(--base-rotate) - .3deg)) translateY(1px);
   }
 
   100% {
@@ -980,15 +1030,26 @@ textarea.sticky-input {
   box-shadow: 0 1px 3px #0000001a, inset 0 1px 2px #ffffff80;
 }
 
-.floating-note {
-  animation: 6s ease-in-out infinite floatAnimation;
+.pinned-note {
+  animation-name: slapOnWall, pinnedSway;
+  animation-duration: var(--entry-duration, .7s), var(--sway-duration, 9s);
+  animation-timing-function: cubic-bezier(.22, 1, .36, 1), ease-in-out;
+  animation-delay: var(--entry-delay, 0s), var(--sway-delay, .7s);
+  animation-iteration-count: 1, infinite;
+  animation-play-state: running, running;
+  animation-fill-mode: both, none;
 }
 
-.floating-note:hover, .note-card:hover {
-  animation-play-state: paused;
-  box-shadow: 4px 20px 30px #0006;
+.floating-note {
+  animation: 9s ease-in-out infinite pinnedSway;
+}
+
+.pinned-note:hover, .floating-note:hover, .note-card:hover {
+  transform: rotate(calc(var(--base-rotate) * .3)) scale(1.06) translateY(-8px) !important;
   z-index: 1000 !important;
-  transform: rotate(0)scale(1.1)translateY(-10px) !important;
+  transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s !important;
+  animation-play-state: paused !important;
+  box-shadow: 4px 18px 35px #00000059, 2px 4px 10px #0000001f !important;
 }
 
 .note-card:before {
@@ -1379,12 +1440,34 @@ textarea.sticky-input {
   right: 0;
 }
 
-.note-card.dragging {
+.note-card.dragging, .pinned-note.dragging {
   z-index: 9999 !important;
-  transition: box-shadow .15s, transform .15s !important;
-  animation: none !important;
-  transform: rotate(1deg)scale(1.07) !important;
-  box-shadow: 6px 20px 40px #00000073 !important;
+  transition: box-shadow .12s, transform .12s cubic-bezier(.34, 1.56, .64, 1) !important;
+  animation-name: none !important;
+  transform: rotate(2deg)scale(1.08) !important;
+  box-shadow: 8px 24px 48px #00000080, 2px 4px 12px #0003 !important;
+}
+
+@keyframes dropBack {
+  0% {
+    transform: rotate(var(--base-rotate)) scale(1.08) translateY(-6px);
+  }
+
+  55% {
+    transform: rotate(var(--base-rotate)) scale(.97) translateY(2px);
+  }
+
+  78% {
+    transform: rotate(var(--base-rotate)) scale(1.01) translateY(-1px);
+  }
+
+  100% {
+    transform: rotate(var(--base-rotate)) scale(1) translateY(0);
+  }
+}
+
+.note-card.drop-back {
+  animation: .4s cubic-bezier(.22, 1, .36, 1) both dropBack !important;
 }
 
 .wall-container.dragging-active {

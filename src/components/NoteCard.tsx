@@ -98,7 +98,7 @@ export function NoteCard({ note, pos }: NoteCardProps) {
   return (
     <div
       ref={cardRef}
-      className={`note-card glass-panel pinned-note${dragging ? " dragging" : ""}`}
+      className={`note-card glass-panel pinned-note${dragging ? " dragging" : ""}${justDropped ? " drop-back" : ""}`}
       style={
         {
           backgroundColor: note.color?.startsWith("#") ? note.color : undefined,

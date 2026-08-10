@@ -1,8 +1,0 @@
-var R=require("../chunks/ssr/[turbopack]_runtime.js")("server/pages/_error.js")
-R.c("server/chunks/ssr/node_modules__pnpm_1bcb761._.js")
-R.c("server/chunks/ssr/[externals]__0mly4vc._.js")
-R.c("server/chunks/ssr/node_modules__pnpm_1agbsw2._.js")
-R.c("server/chunks/ssr/[externals]__1vp7etu._.js")
-R.c("server/chunks/ssr/006f_next_012zhww._.js")
-R.m("[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/dist/esm/build/templates/pages.js { INNER_PAGE => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/dist/pages/_error.js [ssr] (ecmascript)\", INNER_DOCUMENT => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/document.js [ssr] (ecmascript)\", INNER_APP => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/app.js [ssr] (ecmascript)\" } [ssr] (ecmascript)")
-module.exports=R.m("[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/dist/esm/build/templates/pages.js { INNER_PAGE => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/dist/pages/_error.js [ssr] (ecmascript)\", INNER_DOCUMENT => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/document.js [ssr] (ecmascript)\", INNER_APP => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_56ebab7ee8356167e328f629640522c3/node_modules/next/app.js [ssr] (ecmascript)\" } [ssr] (ecmascript)").exports
