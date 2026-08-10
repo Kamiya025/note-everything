@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///F:/note-everything/src/app/providers.tsx"],"sourcesContent":["\"use client\"\n\nimport { QueryClient, QueryClientProvider } from '@tanstack/react-query'\nimport { useState } from 'react'\n\nexport default function Providers({ children }: { children: React.ReactNode }) {\n  const [queryClient] = useState(\n    () =>\n      new QueryClient({\n        defaultOptions: {\n          queries: {\n            staleTime: 60 * 1000, // 1 minute\n            refetchOnWindowFocus: false,\n          },\n        },\n      })\n  )\n\n  return (\n    <QueryClientProvider client={queryClient}>\n      {children}\n    </QueryClientProvider>\n  )\n}\n"],"names":["Providers","children","queryClient","defaultOptions","queries","staleTime","refetchOnWindowFocus","client"],"mappings":";;;;;AAEA;AAAA;AACA;AAHA;;;;AAKe,SAASA,UAAU,EAAEC,QAAQ,EAAiC;IAC3E,MAAM,CAACC,YAAY,GAAG,IAAA,gUAAQ,EAC5B,IACE,IAAI,sQAAW,CAAC;YACdC,gBAAgB;gBACdC,SAAS;oBACPC,WAAW,KAAK;oBAChBC,sBAAsB;gBACxB;YACF;QACF;IAGJ,qBACE,6VAAC,8SAAmB;QAACC,QAAQL;kBAC1BD;;;;;;AAGP"}}]
-}
