@@ -20,7 +20,8 @@ export async function POST(request: Request) {
 
     let message = '';
     if (body.type === 'note') {
-      message = `📝 <b>Ghi chú mới trên Wall of Notes!</b>\n\n👤 <b>Người gửi:</b> ${escapeHtml(body.author)}\n💬 <b>Nội dung:</b> ${escapeHtml(body.content)}`;
+      const origin = request.headers.get('origin') || new URL(request.url).origin;
+      message = `📝 <b>Ghi chú mới trên Wall of Notes!</b>\n\n👤 <b>Người gửi:</b> ${escapeHtml(body.author)}\n💬 <b>Nội dung:</b> ${escapeHtml(body.content)}\n\n🌐 <a href="${origin}">Xem trên Web</a>`;
     } else if (body.type === 'visitor') {
       const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'Unknown IP';
       const country = request.headers.get('x-vercel-ip-country') || 'Unknown Country';

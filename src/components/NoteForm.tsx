@@ -15,6 +15,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
   const [content, setContent] = useState("")
   const [author, setAuthor] = useState("")
   const [color, setColor] = useState<string>(PRESET_COLORS[0])
+  const [isAnonymous, setIsAnonymous] = useState(false)
   const queryClient = useQueryClient()
 
   const { mutate: addNote, isPending: isSubmitting } = useMutation({
@@ -49,7 +50,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
     if (!content.trim()) return
     addNote({
       content: content.trim(),
-      author: author.trim() || "Anonymous",
+      author: isAnonymous ? "Ẩn danh" : (author.trim() || "Ẩn danh"),
       color,
     })
   }
@@ -88,15 +89,31 @@ export function NoteForm({ onClose }: NoteFormProps) {
 
         {/* Author + Color row */}
         <div className="form-row">
-          <input
-            type="text"
-            className="form-input"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            placeholder="Your name (optional)"
-            maxLength={30}
-            disabled={isSubmitting}
-          />
+          <div className="author-field">
+            <label className="anonymous-toggle">
+              <input
+                type="checkbox"
+                checked={isAnonymous}
+                onChange={(e) => {
+                  setIsAnonymous(e.target.checked)
+                  if (e.target.checked) setAuthor("")
+                }}
+                disabled={isSubmitting}
+              />
+              <span>Viết ẩn danh</span>
+            </label>
+            {!isAnonymous && (
+              <input
+                type="text"
+                className="form-input"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Tên của bạn (tuỳ chọn)"
+                maxLength={30}
+                disabled={isSubmitting}
+              />
+            )}
+          </div>
 
           <div className="form-colors">
             <Palette size={16} className="form-palette-icon" />

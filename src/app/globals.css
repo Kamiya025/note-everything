@@ -683,6 +683,28 @@ textarea.sticky-input {
   padding: 0.2rem 0;
 }
 
+.author-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 120px;
+  gap: 0.25rem;
+}
+
+.anonymous-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  user-select: none;
+}
+
+.anonymous-toggle input[type="checkbox"] {
+  cursor: pointer;
+}
+
 .form-input::placeholder {
   color: rgba(0, 0, 0, 0.3);
   font-style: italic;
