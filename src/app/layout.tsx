@@ -22,6 +22,7 @@ export const viewport: Viewport = {
 }
 
 import Providers from './providers'
+import { InstallPWA } from '../components/InstallPWA'
 
 export default function RootLayout({
   children,
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>{children}</Providers>
+        <InstallPWA />
       </body>
     </html>
   )

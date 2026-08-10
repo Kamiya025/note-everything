@@ -13,9 +13,7 @@ interface NoteFormProps {
 
 export function NoteForm({ onClose }: NoteFormProps) {
   const [content, setContent] = useState("")
-  const [author, setAuthor] = useState("")
   const [color, setColor] = useState<string>(PRESET_COLORS[0])
-  const [isAnonymous, setIsAnonymous] = useState(false)
   const queryClient = useQueryClient()
 
   const { mutate: addNote, isPending: isSubmitting } = useMutation({
@@ -35,7 +33,6 @@ export function NoteForm({ onClose }: NoteFormProps) {
       })
       sendTelegramNotification(data.content, data.author).catch(console.error)
       setContent("")
-      setAuthor("")
       setColor(PRESET_COLORS[0])
       onClose()
     },
@@ -50,7 +47,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
     if (!content.trim()) return
     addNote({
       content: content.trim(),
-      author: isAnonymous ? "Ẩn danh" : (author.trim() || "Ẩn danh"),
+      author: "Anonymous",
       color,
     })
   }
@@ -89,32 +86,6 @@ export function NoteForm({ onClose }: NoteFormProps) {
 
         {/* Author + Color row */}
         <div className="form-row">
-          <div className="author-field">
-            <label className="anonymous-toggle">
-              <input
-                type="checkbox"
-                checked={isAnonymous}
-                onChange={(e) => {
-                  setIsAnonymous(e.target.checked)
-                  if (e.target.checked) setAuthor("")
-                }}
-                disabled={isSubmitting}
-              />
-              <span>Viết ẩn danh</span>
-            </label>
-            {!isAnonymous && (
-              <input
-                type="text"
-                className="form-input"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Tên của bạn (tuỳ chọn)"
-                maxLength={30}
-                disabled={isSubmitting}
-              />
-            )}
-          </div>
-
           <div className="form-colors">
             <Palette size={16} className="form-palette-icon" />
             {PRESET_COLORS.map((c) => (
