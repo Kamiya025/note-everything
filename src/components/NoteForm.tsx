@@ -27,17 +27,12 @@ export function NoteForm({ onClose }: NoteFormProps) {
       return response.data as Note
     },
     onSuccess: (data) => {
-      // Optimistically update the cache if it doesn't already exist via Realtime
       queryClient.setQueryData<Note[]>(["notes"], (old) => {
         if (!old) return [data]
         if (old.some((n) => n.id === data.id)) return old
         return [data, ...old].slice(0, 200)
       })
-
-      // Send Telegram Notification in the background (fire and forget)
       sendTelegramNotification(data.content, data.author).catch(console.error)
-
-      // Reset form and close
       setContent("")
       setAuthor("")
       setColor(PRESET_COLORS[0])
@@ -52,55 +47,50 @@ export function NoteForm({ onClose }: NoteFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!content.trim()) return
-
-    const finalAuthor = author.trim() || "Anonymous"
-
     addNote({
       content: content.trim(),
-      author: finalAuthor,
-      color: color,
+      author: author.trim() || "Anonymous",
+      color,
     })
   }
 
   return (
     <div
-      className="form-sticky-note animate-fade-in w-full sm:min-w-min"
-      style={{ backgroundColor: color }}
+      className="form-sticky-note animate-fade-in"
+      style={{ "--note-color": color } as React.CSSProperties}
     >
-      <div className="flex whitespace-nowrap justify-between gap-2 items-center mb-6">
-        <h2 className="m-0 text-slate-800 text-2xl font-semibold">
-          Create New Note
-        </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="close-btn"
-          title="Close note"
-        >
-          <span className="close-icon">X</span>
+      {/* Thumbtack pin */}
+      <div className="form-pin" aria-hidden="true" />
+
+      {/* Header */}
+      <div className="form-header">
+        <span className="form-title">New Note</span>
+        <button type="button" onClick={onClose} className="close-btn" title="Close">
+          <span className="close-icon">×</span>
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="note-form">
-        <div className="relative">
+        {/* Content — sits on ruled lines */}
+        <div className="form-field">
           <textarea
-            className="sticky-input w-full"
+            className="form-textarea"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="What's on your mind?"
             required
             maxLength={150}
             disabled={isSubmitting}
+            rows={5}
           />
-          <div className="text-right text-xs text-slate-500 mt-1 italic">
-            {content.length}/150
-          </div>
+          <div className="form-char-count">{content.length}/150</div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mt-4">
+        {/* Author + Color row */}
+        <div className="form-row">
           <input
             type="text"
-            className="sticky-input flex-1 w-full sm:w-auto"
+            className="form-input"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             placeholder="Your name (optional)"
@@ -108,47 +98,44 @@ export function NoteForm({ onClose }: NoteFormProps) {
             disabled={isSubmitting}
           />
 
-          <div className="color-picker flex items-center gap-2">
-            <Palette size={20} className="text-slate-500" />
-            <div className="flex gap-1.5">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={`color-btn ${color === c ? "selected" : ""}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setColor(c)}
-                  disabled={isSubmitting}
-                  aria-label={`Select color ${c}`}
-                />
-              ))}
-              <div className="color-picker-wrapper">
-                <input
-                  type="color"
-                  value={color.startsWith("#") ? color : "#ffffff"}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="color-input"
-                  title="Choose custom color"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
+          <div className="form-colors">
+            <Palette size={16} className="form-palette-icon" />
+            {PRESET_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`color-btn ${color === c ? "selected" : ""}`}
+                style={{ backgroundColor: c }}
+                onClick={() => setColor(c)}
+                disabled={isSubmitting}
+                aria-label={`Color ${c}`}
+              />
+            ))}
+            <input
+              type="color"
+              value={color.startsWith("#") ? color : "#ffffff"}
+              onChange={(e) => setColor(e.target.value)}
+              className="color-input"
+              title="Custom color"
+              disabled={isSubmitting}
+            />
           </div>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
           disabled={isSubmitting || !content.trim()}
-          className="submit-button mt-4"
+          className="submit-button"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="animate-spin" size={20} />
-              <span>Sticking...</span>
+              <Loader2 className="loading-spinner" size={18} />
+              <span>Sticking…</span>
             </>
           ) : (
             <>
-              <Send size={20} />
+              <Send size={18} />
               <span>Stick to Wall</span>
             </>
           )}

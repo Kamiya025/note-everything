@@ -41,13 +41,16 @@ function OdometerDigit({ digit, delay }: { digit: string; delay: number }) {
   )
 }
 
-export function OdometerCounter({ count, label = "visitors" }: OdometerCounterProps) {
+export function OdometerCounter({
+  count,
+  label = "visitors",
+}: OdometerCounterProps) {
   const digits = String(count).padStart(6, "0").split("")
 
   return (
-    <div className="odometer-wrapper">
-      <div className="odometer-label-top">{label}</div>
-      <div className="odometer-display">
+    <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2">
+      <div className="text-[0.65rem] uppercase tracking-[0.08em] text-white/40 font-['Outfit']">{label}</div>
+      <div className="flex items-center gap-0.5">
         {digits.map((d, i) => (
           <OdometerDigit key={i} digit={d} delay={i * 30} />
         ))}

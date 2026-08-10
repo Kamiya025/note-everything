@@ -47,6 +47,7 @@ main {
   display: flex;
   flex-direction: column;
   position: relative;
+  padding-bottom: 28px; /* clearance for stats-footer */
 }
 
 main > section {
@@ -79,7 +80,6 @@ main > section {
   position: relative;
   text-align: center;
   transform-origin: top center;
-  animation: swing 6s ease-in-out infinite;
 }
 
 /* The strings */
@@ -111,9 +111,9 @@ main > section {
 }
 
 @keyframes swing {
-  0% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-  100% { transform: rotate(-2deg); }
+  0% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+  100% { transform: rotate(-1deg); }
 }
 
 .hanging-sign h1 {
@@ -245,34 +245,35 @@ textarea.sticky-input {
   transform: none;
 }
 
-/* Submit Button for Sticky Note */
+/* Submit Button */
 .submit-button {
   background: #334155;
   color: white;
-  border: 2px solid #1e293b;
-  border-radius: 4px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
+  border: none;
+  border-radius: 0;
+  padding: 0.65rem 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Outfit', sans-serif;
+  font-family: inherit;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   width: 100%;
-  border-radius: 2px 10px 10px 2px;
+  margin-top: 1rem;
+  letter-spacing: 0.01em;
 }
 
 .submit-button:hover:not(:disabled) {
   background: #1e293b;
-  transform: translateY(-2px) rotate(-1deg);
-  box-shadow: 2px 6px 15px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
+  box-shadow: 2px 6px 16px rgba(0,0,0,0.25);
 }
 
 .submit-button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -354,69 +355,34 @@ textarea.sticky-input {
   margin-top: 0;
 }
 
-/* ─── Entry: Note slaps onto wall ──────────────────────────────
-   Phase 1 (0→55%): drop-in from above, spinning into final angle
-   Phase 2 (55→75%): over-rotates past final angle (bounce)
-   Phase 3 (75→88%): springs back, slightly past
-   Phase 4 (88→100%): settles to final angle + tiny compress
-───────────────────────────────────────────────────────────────── */
+/* Note entry: drop in from above and settle */
 @keyframes slapOnWall {
   0% {
     transform:
-      translateY(calc(-60px - 8vh))
-      rotate(calc(var(--base-rotate) + var(--entry-spin, 25deg)))
-      scale(0.85);
+      translateY(calc(-50px - 6vh))
+      rotate(calc(var(--base-rotate) + var(--entry-spin, 20deg)))
+      scale(0.9);
     opacity: 0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
-  35% {
+  70% {
+    transform:
+      translateY(0px)
+      rotate(var(--base-rotate))
+      scale(1.0);
     opacity: 1;
   }
-  55% {
+  85% {
     transform:
-      translateY(0px)
-      rotate(var(--base-rotate))
-      scale(1.0);
-    box-shadow:
-      2px 4px 10px rgba(0,0,0,0.15),
-      inset 0 -20px 20px -20px rgba(0,0,0,0.1),
-      inset 0 20px 20px -20px rgba(255,255,255,0.6);
-  }
-  /* Overshoot: wobble past the resting angle */
-  68% {
-    transform:
-      translateY(-4px)
-      rotate(calc(var(--base-rotate) + var(--wobble-dir, 1) * 4deg))
-      scale(1.01);
-  }
-  80% {
-    transform:
-      translateY(1px)
-      rotate(calc(var(--base-rotate) - var(--wobble-dir, 1) * 2deg))
-      scale(0.995);
-  }
-  91% {
-    transform:
-      translateY(-1px)
-      rotate(calc(var(--base-rotate) + var(--wobble-dir, 1) * 0.8deg))
-      scale(1.0);
+      translateY(-3px)
+      rotate(calc(var(--base-rotate) + var(--wobble-dir, 1) * 2deg))
+      scale(1.005);
   }
   100% {
-    transform:
-      translateY(0px)
-      rotate(var(--base-rotate))
-      scale(1.0);
+    transform: translateY(0px) rotate(var(--base-rotate)) scale(1.0);
     opacity: 1;
   }
 }
 
-/* ─── Resting: pinned to wall, barely moving ──────────────────── */
-@keyframes pinnedSway {
-  0%   { transform: rotate(var(--base-rotate)) translateY(0px); }
-  30%  { transform: rotate(calc(var(--base-rotate) + 0.4deg)) translateY(-1.5px); }
-  65%  { transform: rotate(calc(var(--base-rotate) - 0.3deg)) translateY(1px); }
-  100% { transform: rotate(var(--base-rotate)) translateY(0px); }
-}
 
 /* Loading spinner animation */
 @keyframes spin {
@@ -457,20 +423,46 @@ textarea.sticky-input {
 /* Note Card - Sticky Note Style */
 .note-card {
   position: absolute;
-  width: 280px;
-  max-width: 90vw;
-  padding: 1.5rem;
-  transition: box-shadow 0.3s ease, z-index 0s, transform 0.3s ease;
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.15),
-              inset 0 -20px 20px -20px rgba(0,0,0,0.1),
-              inset 0 20px 20px -20px rgba(255,255,255,0.6);
-  color: #1e293b; 
-  /* Fallback to handwriting-like fonts for notes */
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Outfit', sans-serif; 
-  border-radius: 2px 2px 25px 5px; /* Curl effect on bottom right */
-  background-image: url('/paper-texture.png');
-  background-size: cover;
-  background-blend-mode: multiply;
+  width: 260px;
+  max-width: 88vw;
+  min-height: 200px;
+  padding: 2.2rem 1.4rem 1.2rem;
+  color: #1e293b;
+  font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive;
+
+  /* Ruled paper lines */
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(0, 0, 0, 0.07) 27px,
+      rgba(0, 0, 0, 0.07) 28px
+    ),
+    /* Left red margin line */
+    linear-gradient(
+      to right,
+      transparent 38px,
+      rgba(220, 80, 80, 0.18) 38px,
+      rgba(220, 80, 80, 0.18) 39px,
+      transparent 39px
+    ),
+    url('/paper-texture.png'),
+    /* Base note color */
+    linear-gradient(var(--note-color, #fef9e7), var(--note-color, #fef9e7));
+  background-size: auto, auto, cover, auto;
+  background-blend-mode: normal, normal, multiply, normal;
+
+  /* Page-curl bottom-right shadow via clip path illusion */
+  border-radius: 0;
+
+  /* Layered shadow: ambient + curl */
+  box-shadow:
+    3px 6px 18px rgba(0, 0, 0, 0.22),
+    1px 2px 4px rgba(0, 0, 0, 0.12);
+
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Override glass-panel for note cards so they are solid */
@@ -480,147 +472,233 @@ textarea.sticky-input {
   border: none;
 }
 
-/* Tape effect at the top */
+/* ── Thumbtack pin at top center ──────────────────────────── */
 .note-card::after {
   content: '';
   position: absolute;
-  top: -12px;
+  top: -7px;
   left: 50%;
-  transform: translateX(-50%) rotate(-3deg);
-  width: 100px;
-  height: 32px;
-  background-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.5);
-  border-left: 2px dashed rgba(255, 255, 255, 0.5);
-  border-right: 2px dashed rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(2px);
-  z-index: 5;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  /* Pin head: shiny metal circle */
+  background: radial-gradient(
+    circle at 35% 35%,
+    #e8e8e8 0%,
+    #b0b0b0 40%,
+    #888 75%,
+    #555 100%
+  );
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.45),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  z-index: 10;
 }
 
-/* ─── Entry + resting state ───────────────────────────────────── */
+
+
+/* Note color is set via --note-color CSS variable in NoteCard inline style */
+
+/* Entry: drop in once, then stay pinned */
 .pinned-note {
-  /*
-    Two-phase chain:
-      1. slapOnWall fires once (delayed by --entry-delay)
-      2. pinnedSway starts right after entry ends (delay = --entry-delay + --entry-duration)
-    We use animation-delay shorthand per-animation (CSS list syntax).
-  */
-  animation-name: slapOnWall, pinnedSway;
-  animation-duration: var(--entry-duration, 0.7s), var(--sway-duration, 9s);
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1), ease-in-out;
-  animation-delay: var(--entry-delay, 0s), var(--sway-delay, 0.7s);
-  animation-iteration-count: 1, infinite;
-  animation-fill-mode: both, none;
-  animation-play-state: running, running;
+  animation: slapOnWall var(--entry-duration, 0.65s) cubic-bezier(0.22, 1, 0.36, 1) var(--entry-delay, 0s) both;
 }
 
-/* Legacy class kept for skeleton notes */
+/* Skeleton notes — no entry animation */
 .floating-note {
-  animation: pinnedSway 9s ease-in-out infinite;
+  animation: none;
 }
 
-/* ─── Hover: pick up the note from wall ──────────────────────── */
+/* Hover: lift off the wall */
 .pinned-note:hover,
 .floating-note:hover,
 .note-card:hover {
-  transform: rotate(calc(var(--base-rotate) * 0.3)) scale(1.06) translateY(-8px) !important;
+  transform: rotate(var(--base-rotate)) scale(1.05) translateY(-6px) !important;
   box-shadow:
-    4px 18px 35px rgba(0, 0, 0, 0.35),
-    2px 4px 10px rgba(0, 0, 0, 0.12) !important;
+    4px 16px 30px rgba(0, 0, 0, 0.3),
+    2px 4px 8px rgba(0, 0, 0, 0.12) !important;
   z-index: 1000 !important;
   animation-play-state: paused !important;
-  transition:
-    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.25s ease !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
-
-/* Realistic curl shadow */
-.note-card::before {
-  content: '';
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  width: 50%;
-  height: 20px;
-  box-shadow: 0 15px 12px rgba(0, 0, 0, 0.25);
-  transform: rotate(4deg);
-  z-index: -1;
-}
-
-/* Pastel solid colors for sticky notes */
-.note-card[data-color="pink"] { background: #fecdd3; }
-.note-card[data-color="blue"] { background: #bae6fd; }
-.note-card[data-color="green"] { background: #bbf7d0; }
-.note-card[data-color="yellow"] { background: #fef08a; }
-.note-card[data-color="purple"] { background: #e9d5ff; }
 
 .note-content {
-  font-size: 1.15rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.75rem; /* Match the 28px ruled lines */
   white-space: pre-wrap;
-  color: #334155;
-  margin-top: 10px; /* Space for tape */
+  color: #1c2b3a;
+  flex: 1;
+  /* Offset so text sits on first ruled line */
+  padding-top: 4px;
+  letter-spacing: 0.01em;
+  word-break: break-word;
 }
 
 .note-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
-  color: #64748b;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  padding-top: 0.75rem;
-  margin-top: auto;
+  font-size: 0.75rem;
+  color: #78909c;
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
+  padding-top: 0.5rem;
+  margin-top: 0.75rem;
+  font-style: italic;
 }
 
-/* Form Sticky Note Style */
+/* ─── Form: same design as NoteCard ──────────────────────────── */
 .form-sticky-note {
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 480px;
   margin: 0 auto;
-  padding: 2rem;
-  box-shadow: 2px 8px 20px rgba(0, 0, 0, 0.15),
-              inset 0 -30px 30px -30px rgba(0,0,0,0.1),
-              inset 0 30px 30px -30px rgba(255,255,255,0.6);
-  color: #1e293b; 
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Outfit', sans-serif; 
-  border-radius: 2px 2px 25px 5px;
-  transition: background-color 0.3s ease;
-  background-image: url('/paper-texture.png');
-  background-size: cover;
-  background-blend-mode: multiply;
+  padding: 2.4rem 1.6rem 1.6rem;
+
+  color: #1c2b3a;
+  font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive;
+
+  /* Same ruled-lines background stack as NoteCard */
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(0, 0, 0, 0.07) 27px,
+      rgba(0, 0, 0, 0.07) 28px
+    ),
+    linear-gradient(
+      to right,
+      transparent 38px,
+      rgba(220, 80, 80, 0.18) 38px,
+      rgba(220, 80, 80, 0.18) 39px,
+      transparent 39px
+    ),
+    url('/paper-texture.png'),
+    linear-gradient(var(--note-color, #fef9e7), var(--note-color, #fef9e7));
+  background-size: auto, auto, cover, auto;
+  background-blend-mode: normal, normal, multiply, normal;
+
+  border-radius: 0;
+  box-shadow:
+    4px 10px 28px rgba(0, 0, 0, 0.28),
+    2px 4px 8px rgba(0, 0, 0, 0.14);
+
+  transition: background-image 0.2s ease;
 }
 
-.form-sticky-note::after {
-  content: '';
+/* Thumbtack pin — same as NoteCard ::after */
+.form-pin {
   position: absolute;
-  top: -15px;
+  top: -8px;
   left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 130px;
-  height: 38px;
-  background-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.5);
-  border-left: 2px dashed rgba(255, 255, 255, 0.5);
-  border-right: 2px dashed rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(2px);
-  z-index: 5;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #e8e8e8 0%,
+    #b0b0b0 40%,
+    #888 75%,
+    #555 100%
+  );
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* Realistic curl shadow for form */
-.form-sticky-note::before {
-  content: '';
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  width: 50%;
-  height: 20px;
-  box-shadow: 0 18px 15px rgba(0, 0, 0, 0.3);
-  transform: rotate(4deg);
-  z-index: -1;
+/* Form header row */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.12);
 }
+
+.form-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1c2b3a;
+  letter-spacing: -0.01em;
+}
+
+/* Textarea */
+.form-field {
+  margin-bottom: 0.5rem;
+}
+
+.form-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  font-size: 1.05rem;
+  line-height: 1.75rem; /* matches ruled lines */
+  color: #1c2b3a;
+  padding: 0;
+  /* Align text to sit on ruled lines */
+  padding-top: 2px;
+}
+
+.form-textarea::placeholder {
+  color: rgba(0, 0, 0, 0.28);
+  font-style: italic;
+}
+
+.form-char-count {
+  text-align: right;
+  font-size: 0.72rem;
+  color: rgba(0, 0, 0, 0.35);
+  font-style: italic;
+  margin-top: 0.2rem;
+}
+
+/* Author + colors row */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
+}
+
+.form-input {
+  flex: 1;
+  min-width: 120px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+  outline: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #1c2b3a;
+  padding: 0.2rem 0;
+}
+
+.form-input::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+  font-style: italic;
+}
+
+.form-colors {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.form-palette-icon {
+  color: rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
 
 /* Modal Overlay */
 .modal-overlay {
@@ -639,80 +717,102 @@ textarea.sticky-input {
 }
 
 /* Stack of sticky notes FAB */
+/* ─── Write Note FAB ──────────────────────────────────────────── */
 .sticky-stack-fab {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 90px;
-  height: 90px;
-  background-image: url('/sticky-stack.png');
-  background-size: cover;
-  background-position: center;
-  background-color: white;
-  border: 1px solid rgba(0,0,0,0.05);
-  border-radius: 24px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  width: 76px;
+  height: 80px;
+
+  /* Same ruled-paper look as notes */
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 11px,
+      rgba(0, 0, 0, 0.08) 11px,
+      rgba(0, 0, 0, 0.08) 12px
+    ),
+    linear-gradient(var(--note-color, #fef9e7), var(--note-color, #fef9e7));
+  --note-color: #fef08a;
+  background-size: auto, auto;
+
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    3px 6px 18px rgba(0, 0, 0, 0.30),
+    1px 2px 5px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   z-index: 90;
-  transition: transform 0.2s;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  /* Slight random tilt — looks pinned */
+  transform: rotate(2deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Thumbtack on the FAB */
+.sticky-stack-fab::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #e8e8e8 0%,
+    #b0b0b0 40%,
+    #888 75%,
+    #555 100%
+  );
+  box-shadow: 0 2px 5px rgba(0,0,0,0.45), inset 0 1px 2px rgba(255,255,255,0.5);
+  z-index: 2;
+}
+
+/* "Write" label at bottom */
+.sticky-stack-fab::after {
+  content: 'Write';
+  position: absolute;
+  bottom: 7px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(0,0,0,0.4);
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
 }
 
 .sticky-stack-fab:hover {
-  transform: scale(1.05) translate(-2px, -2px);
+  transform: rotate(0deg) scale(1.06) translate(-2px, -3px);
+  box-shadow:
+    5px 12px 28px rgba(0, 0, 0, 0.35),
+    2px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Icon wrapper inside FAB */
 .top-note {
-  position: absolute;
-  top: 15%;
-  left: 15%;
-  width: 70%;
-  height: 70%;
-  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
-  transform-origin: bottom left;
-  border-radius: 2px 2px 15px 2px;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 14px; /* leave room for 'Write' label */
 }
 
-/* Tear animation to center of screen */
+/* Tear animation — icon flies to center */
 @keyframes tearOff {
-  0% {
-    transform: rotate(0deg) scale(1) translate(0, 0);
-    opacity: 1;
-    background: transparent;
-    box-shadow: none;
-    border-radius: 2px 2px 15px 2px;
-  }
-  1% {
-    background: #fef08a;
-    background-image: url('/paper-texture.png');
-    background-size: cover;
-    background-blend-mode: multiply;
-    box-shadow: inset 0 -2px 5px -2px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
-  }
-  20% {
-    transform: rotate(-10deg) scale(1.2) translate(-5px, -10px);
-    border-radius: 2px 2px 25px 5px; /* Curl more */
-    background: #fef08a;
-    background-image: url('/paper-texture.png');
-    background-size: cover;
-    background-blend-mode: multiply;
-    box-shadow: inset 0 -2px 5px -2px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
-  }
-  100% {
-    /* Scale up and move to center. At scale 5, -8vw = -40vw */
-    transform: rotate(0deg) scale(5) translate(-8vw, -8vh);
-    opacity: 0;
-    background: #fef08a;
-    background-image: url('/paper-texture.png');
-    background-size: cover;
-    background-blend-mode: multiply;
-  }
+  0%   { transform: scale(1) translate(0, 0); opacity: 1; }
+  40%  { transform: scale(1.3) translate(-4px, -10px) rotate(-8deg); opacity: 1; }
+  100% { transform: scale(4) translate(-10vw, -10vh) rotate(0deg); opacity: 0; }
 }
 
 .top-note.tearing {
@@ -727,6 +827,7 @@ textarea.sticky-input {
     right: 1.5rem;
   }
 }
+
 
 
 .note-author {
@@ -776,76 +877,72 @@ textarea.sticky-input {
   animation: fadeIn 0.5s ease forwards;
 }
 
-/* ─── Stats Panel ─────────────────────────────────────────────── */
-.stats-panel {
-  position: absolute;
-  right: 1.25rem;
-  top: 0.5rem;
+/* ─── Stats Footer ─────────────────────────────────────────────── */
+.stats-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.4rem;
-  background: rgba(0,0,0,0.55);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: 0.55rem 0.85rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.2rem 1.5rem;
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-  z-index: 20;
-  min-width: 160px;
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 80;
+  flex-shrink: 0;
 }
 
 .stats-divider {
-  width: 100%;
-  height: 1px;
-  background: rgba(255,255,255,0.12);
-  margin: 0.1rem 0;
+  width: 1px;
+  height: 28px;
+  background: rgba(255,255,255,0.18);
 }
 
 .last-note-info {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.1rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .last-note-label {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.4);
   font-family: 'Outfit', sans-serif;
 }
 
 .last-note-time {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: #fef08a;
   font-family: 'Outfit', sans-serif;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.footer-email {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.35);
+  font-family: 'Outfit', sans-serif;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.footer-email:hover {
+  color: rgba(255,255,255,0.7);
 }
 
 /* ─── Odometer Counter ────────────────────────────────────────── */
-.odometer-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.15rem;
-}
 
-.odometer-label-top {
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.45);
-  font-family: 'Outfit', sans-serif;
-}
-
-.odometer-display {
-  display: flex;
-  gap: 2px;
-  align-items: center;
-}
 
 .odometer-digit {
   display: inline-block;
@@ -918,17 +1015,7 @@ textarea.sticky-input {
     transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-/* Micro-slam when note is dropped back on wall */
-@keyframes dropBack {
-  0%   { transform: rotate(var(--base-rotate)) scale(1.08) translateY(-6px); }
-  55%  { transform: rotate(var(--base-rotate)) scale(0.97) translateY(2px); }
-  78%  { transform: rotate(var(--base-rotate)) scale(1.01) translateY(-1px); }
-  100% { transform: rotate(var(--base-rotate)) scale(1.0) translateY(0); }
-}
 
-.note-card.drop-back {
-  animation: dropBack 0.4s cubic-bezier(0.22, 1, 0.36, 1) both !important;
-}
 
 /* Prevent text highlight while dragging */
 .wall-container.dragging-active {
@@ -936,11 +1023,10 @@ textarea.sticky-input {
 }
 
 @media (max-width: 600px) {
-  .stats-panel {
-    position: static;
-    align-self: flex-end;
-    margin-top: -0.25rem;
-    margin-right: 0.75rem;
+  .stats-footer {
+    gap: 0.6rem;
+    padding: 0.4rem 1rem;
+    justify-content: space-around;
   }
 
   .header-container {

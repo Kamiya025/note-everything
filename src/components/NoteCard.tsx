@@ -21,7 +21,6 @@ interface NoteCardProps {
 
 export function NoteCard({ note, pos }: NoteCardProps) {
   const [dragging, setDragging] = useState(false)
-  const [justDropped, setJustDropped] = useState(false)
   const [position, setPosition] = useState<{ left: string; top: string } | null>(null)
   const [zIndex, setZIndex] = useState(pos.zIndex)
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -88,8 +87,6 @@ export function NoteCard({ note, pos }: NoteCardProps) {
   const onPointerUp = useCallback(() => {
     setDragging(false)
     setZIndex(Math.floor(Math.random() * 50) + 100)
-    setJustDropped(true)
-    setTimeout(() => setJustDropped(false), 450)
   }, [])
 
   const left = position?.left ?? pos.left
@@ -98,10 +95,11 @@ export function NoteCard({ note, pos }: NoteCardProps) {
   return (
     <div
       ref={cardRef}
-      className={`note-card glass-panel pinned-note${dragging ? " dragging" : ""}${justDropped ? " drop-back" : ""}`}
+      className={`note-card glass-panel pinned-note${dragging ? " dragging" : ""}`}
       style={
         {
-          backgroundColor: note.color?.startsWith("#") ? note.color : undefined,
+          // Use CSS var so ruled-lines background-image stays on top of note color
+          "--note-color": note.color?.startsWith("#") ? note.color : "#fef9e7",
           left,
           top,
           "--base-rotate": dragging ? "0deg" : pos.rotate,
