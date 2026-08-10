@@ -693,3 +693,161 @@ textarea.sticky-input {
 .animate-fade-in {
   animation: fadeIn 0.5s ease forwards;
 }
+
+/* ─── Stats Panel ─────────────────────────────────────────────── */
+.stats-panel {
+  position: absolute;
+  right: 1.25rem;
+  top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  z-index: 20;
+  min-width: 160px;
+}
+
+.stats-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  margin: 0.1rem 0;
+}
+
+.last-note-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.last-note-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.45);
+  font-family: 'Outfit', sans-serif;
+}
+
+.last-note-time {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fef08a;
+  font-family: 'Outfit', sans-serif;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* ─── Odometer Counter ────────────────────────────────────────── */
+.odometer-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.odometer-label-top {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.45);
+  font-family: 'Outfit', sans-serif;
+}
+
+.odometer-display {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.odometer-digit {
+  display: inline-block;
+  width: 18px;
+  height: 26px;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 3px rgba(255,255,255,0.06);
+}
+
+/* Separator between groups of 3 */
+.odometer-digit:nth-child(3)::after,
+.odometer-digit:nth-child(6)::after {
+  content: none;
+}
+
+.odometer-digit-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f6c90e;
+  text-shadow: 0 0 8px rgba(246,201,14,0.7);
+  transition: none;
+  position: relative;
+}
+
+@keyframes odometerFlip {
+  0%   { transform: translateY(0%);   opacity: 1; }
+  45%  { transform: translateY(-110%); opacity: 0; }
+  46%  { transform: translateY(110%);  opacity: 0; }
+  100% { transform: translateY(0%);   opacity: 1; }
+}
+
+.odometer-digit-inner.odometer-flip {
+  animation: odometerFlip 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Highlight line across middle for realism */
+.odometer-digit::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ─── Note Drag State ─────────────────────────────────────────── */
+.note-card.dragging {
+  animation: none !important;
+  transform: rotate(1deg) scale(1.07) !important;
+  box-shadow: 6px 20px 40px rgba(0,0,0,0.45) !important;
+  z-index: 9999 !important;
+  transition: box-shadow 0.15s ease, transform 0.15s ease !important;
+}
+
+/* Prevent text highlight while dragging */
+.wall-container.dragging-active {
+  user-select: none;
+}
+
+@media (max-width: 600px) {
+  .stats-panel {
+    position: static;
+    align-self: flex-end;
+    margin-top: -0.25rem;
+    margin-right: 0.75rem;
+  }
+
+  .header-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}
+

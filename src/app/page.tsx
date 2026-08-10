@@ -4,14 +4,48 @@ import { PenLine, Sparkles } from "lucide-react"
 import { useEffect, useState } from "react"
 import { NoteForm } from "../components/NoteForm"
 import { NoteWall } from "../components/NoteWall"
+import { OdometerCounter } from "../components/OdometerCounter"
 import { isSupabaseConfigured } from "../lib/supabase"
-// Note: We will update this later to call our internal API
 import { sendVisitorNotification } from "../lib/telegram"
+import { useQuery } from "@tanstack/react-query"
+import axios from "axios"
+import type { Note } from "../types"
+import dayjs from "dayjs"
+import relativeTime from "dayjs/plugin/relativeTime"
+
+dayjs.extend(relativeTime)
 
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false)
-
   const [isTearing, setIsTearing] = useState(false)
+  const [visitorCount, setVisitorCount] = useState(0)
+
+  // Fetch visitor count
+  const { data: visitorData } = useQuery<{ count: number }>({
+    queryKey: ["visitors"],
+    queryFn: async () => {
+      const res = await axios.get("/api/visitors")
+      return res.data
+    },
+    staleTime: 60_000,
+  })
+
+  // Fetch notes to find the last note time
+  const { data: notes = [] } = useQuery<Note[]>({
+    queryKey: ["notes"],
+    queryFn: async () => {
+      const res = await axios.get("/api/notes")
+      return res.data
+    },
+  })
+
+  const lastNote = notes[0] // newest is first
+
+  useEffect(() => {
+    if (visitorData) {
+      setVisitorCount(visitorData.count)
+    }
+  }, [visitorData])
 
   useEffect(() => {
     // Check if we already notified about this visitor in this session
@@ -19,18 +53,22 @@ export default function Home() {
     if (!hasVisited) {
       sendVisitorNotification()
       sessionStorage.setItem("hasVisited_WallOfNotes", "true")
+      // Increment counter on new visit
+      axios.post("/api/visitors").then((res) => {
+        setVisitorCount(res.data.count)
+      }).catch(() => {})
     }
   }, [])
 
   const handleAddNoteClick = () => {
-    if (isTearing || isFormOpen) return;
-    setIsTearing(true);
+    if (isTearing || isFormOpen) return
+    setIsTearing(true)
     // Wait for the tear animation to complete before opening the form
     setTimeout(() => {
-      setIsTearing(false);
-      setIsFormOpen(true);
-    }, 600); // 600ms matches the CSS animation duration
-  };
+      setIsTearing(false)
+      setIsFormOpen(true)
+    }, 600) // 600ms matches the CSS animation duration
+  }
 
   if (!isSupabaseConfigured) {
     return (
@@ -68,6 +106,20 @@ export default function Home() {
             />
           </h1>
           <p>Leave a thought, a quote, or just say hi. Everyone can see it!</p>
+        </div>
+
+        {/* Stats Panel */}
+        <div className="stats-panel">
+          <OdometerCounter count={visitorCount} label="lượt ghé thăm" />
+          <div className="stats-divider" />
+          <div className="last-note-info">
+            <span className="last-note-label">ghi chú mới nhất</span>
+            <span className="last-note-time">
+              {lastNote?.createdAt
+                ? dayjs(lastNote.createdAt).fromNow()
+                : "chưa có ghi chú"}
+            </span>
+          </div>
         </div>
       </header>
 
