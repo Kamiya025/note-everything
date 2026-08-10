@@ -13,10 +13,15 @@ export async function sendTelegramNotification(content: string, author: string) 
 export async function sendVisitorNotification() {
   try {
     const userAgent = navigator.userAgent;
+    const language = navigator.language;
+    const screen = `${window.screen.width}x${window.screen.height}`;
+    const url = window.location.href;
+    const referrer = document.referrer;
+
     await fetch('/api/telegram', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'visitor', userAgent })
+      body: JSON.stringify({ type: 'visitor', userAgent, language, screen, url, referrer })
     });
   } catch (error) {
     console.error("Failed to send visitor notification:", error);

@@ -10,11 +10,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Telegram config missing' }, { status: 500 });
     }
 
+    const escapeHtml = (text: string) => {
+      if (!text) return '';
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    };
+
     let message = '';
     if (body.type === 'note') {
-      message = `📝 *Ghi chú mới trên Wall of Notes!*\n\n👤 *Người gửi:* ${body.author}\n💬 *Nội dung:* ${body.content}`;
+      message = `📝 <b>Ghi chú mới trên Wall of Notes!</b>\n\n👤 <b>Người gửi:</b> ${escapeHtml(body.author)}\n💬 <b>Nội dung:</b> ${escapeHtml(body.content)}`;
     } else if (body.type === 'visitor') {
-      message = `👀 *Có người đang xem Wall of Notes!*\n\n💻 *Thiết bị:* \`${body.userAgent}\``;
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'Unknown IP';
+      const country = request.headers.get('x-vercel-ip-country') || 'Unknown Country';
+      const city = request.headers.get('x-vercel-ip-city') || 'Unknown City';
+      
+      message = `👀 <b>Có người đang xem Wall of Notes!</b>\n\n` +
+                `🌍 <b>Quốc gia:</b> ${country} (${city})\n` +
+                `📍 <b>IP:</b> <code>${escapeHtml(ip)}</code>\n` +
+                `🔗 <b>URL:</b> ${escapeHtml(body.url)}\n` +
+                `🌐 <b>Nguồn:</b> ${escapeHtml(body.referrer || 'Trực tiếp')}\n` +
+                `🖥️ <b>Màn hình:</b> ${escapeHtml(body.screen)}\n` +
+                `🗣️ <b>Ngôn ngữ:</b> ${escapeHtml(body.language)}\n` +
+                `💻 <b>Thiết bị:</b> <code>${escapeHtml(body.userAgent)}</code>`;
     }
 
     if (!message) {
@@ -29,11 +48,13 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         chat_id: chatId,
         text: message,
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
       }),
     });
 
     if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Telegram API Error Data:', errorData);
       throw new Error(`Telegram API Error: ${response.statusText}`);
     }
 
