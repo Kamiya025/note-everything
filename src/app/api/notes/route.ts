@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { content, author, color } = body;
+    const { content, author, color, shape } = body;
 
     if (!content) {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
@@ -51,6 +51,7 @@ export async function POST(request: Request) {
           content: cleanContent,
           author: author?.trim() || 'Anonymous',
           color: color,
+          shape: shape || 'rectangle',
         }
       ])
       .select()

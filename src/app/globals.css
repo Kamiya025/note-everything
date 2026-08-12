@@ -505,6 +505,77 @@ textarea.sticky-input {
   animation: slapOnWall var(--entry-duration, 0.65s) cubic-bezier(0.22, 1, 0.36, 1) var(--entry-delay, 0s) both;
 }
 
+/* ─── Note Shapes ─────────────────────────────────── */
+.note-card.shape-circle {
+  clip-path: circle(50% at 50% 50%);
+  border-radius: 50%;
+  aspect-ratio: 1/1;
+  padding: 2.5rem 1.5rem !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.note-card.shape-circle .note-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.note-card.shape-circle .note-footer {
+  justify-content: center;
+  width: 90%;
+}
+
+.note-card.shape-heart {
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="black"/></svg>');
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="black"/></svg>');
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  aspect-ratio: 1.1/1;
+  padding: 3.5rem 2rem 4rem 2rem !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.note-card.shape-heart .note-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.note-card.shape-heart .note-footer {
+  justify-content: center;
+  width: 80%;
+}
+
+.note-card.shape-star {
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  aspect-ratio: 1/1.05;
+  padding: 4.5rem 2.5rem 3rem 2.5rem !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.note-card.shape-star .note-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.note-card.shape-star .note-footer {
+  justify-content: center;
+  width: 80%;
+  border-top: none;
+}
+
 /* Skeleton notes — no entry animation */
 .floating-note {
   animation: none;

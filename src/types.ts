@@ -1,3 +1,5 @@
+export type NoteShape = 'rectangle' | 'circle' | 'heart' | 'star';
+
 export interface Note {
   id?: string;
   content: string;
@@ -5,6 +7,7 @@ export interface Note {
   color: string; // Supports hex colors for custom color picking
   createdAt: any; // Firestore Timestamp
   isPrivate?: boolean;
+  shape?: NoteShape;
 }
 
 export const PRESET_COLORS = [

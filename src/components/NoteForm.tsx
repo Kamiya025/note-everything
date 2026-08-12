@@ -1,11 +1,11 @@
 "use client"
 import React, { useState } from "react"
-import { Send, Palette, Loader2, Lock } from "lucide-react"
+import { Send, Palette, Loader2, Lock, Square, Circle, Heart, Star } from "lucide-react"
 import { sendTelegramNotification } from "../lib/telegram"
 import { PRESET_COLORS } from "../types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
-import type { Note } from "../types"
+import type { Note, NoteShape } from "../types"
 import { db } from "../lib/db"
 import { usePathname } from "next/navigation"
 import { loadConfig } from "../lib/privateConfig"
@@ -22,6 +22,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
   const [content, setContent] = useState("")
   const [author, setAuthor] = useState("")
   const [color, setColor] = useState<string>(initialColor)
+  const [shape, setShape] = useState<NoteShape>("rectangle")
   const queryClient = useQueryClient()
 
   const { mutate: addNote, isPending: isSubmitting } = useMutation({
@@ -29,6 +30,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
       content: string
       author: string
       color: string
+      shape: NoteShape
     }) => {
       const response = await axios.post("/api/notes", newNote)
       return response.data as Note
@@ -43,6 +45,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
       setContent("")
       setAuthor("")
       setColor(PRESET_COLORS[0])
+      setShape("rectangle")
       onClose()
     },
     onError: (error) => {
@@ -61,6 +64,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
         content: content.trim(),
         author: author.trim() || "Me",
         color,
+        shape,
         createdAt: new Date().toISOString(),
         isPrivate: true,
       };
@@ -70,6 +74,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
         setContent("")
         setAuthor("")
         setColor(PRESET_COLORS[0])
+        setShape("rectangle")
         onClose()
       } catch (err) {
         console.error("Error adding private note: ", err)
@@ -80,6 +85,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
         content: content.trim(),
         author: author.trim() || "Anonymous",
         color,
+        shape,
       })
     }
   }
@@ -130,6 +136,42 @@ export function NoteForm({ onClose }: NoteFormProps) {
             aria-label="Signature (optional)"
           />
         </div>
+        
+        {/* Shape Selection row */}
+        <div className="form-row" style={{ marginTop: '0.4rem', marginBottom: '0.4rem' }}>
+          <div className="form-colors" style={{ paddingBottom: '0.4rem', borderBottom: '1px dashed rgba(0,0,0,0.1)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#334155', marginRight: '0.5rem' }}>Shape:</span>
+            {(['rectangle', 'circle', 'heart', 'star'] as NoteShape[]).map((s) => (
+              <button
+                key={s}
+                type="button"
+                className={`shape-btn ${shape === s ? "selected" : ""}`}
+                onClick={() => setShape(s)}
+                disabled={isSubmitting}
+                aria-label={`Shape ${s}`}
+                style={{
+                  background: shape === s ? '#fff' : 'transparent',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: shape === s ? '#1c2b3a' : '#64748b',
+                  boxShadow: shape === s ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {s === 'rectangle' && <Square size={16} />}
+                {s === 'circle' && <Circle size={16} />}
+                {s === 'heart' && <Heart size={16} />}
+                {s === 'star' && <Star size={16} />}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="form-row">
           <div className="form-colors">
             <Palette size={16} className="form-palette-icon" />

@@ -97,7 +97,7 @@ export function NoteCard({ note, pos, noteFont }: NoteCardProps) {
   return (
     <div
       ref={cardRef}
-      className={`note-card glass-panel pinned-note${dragging ? " dragging" : ""}`}
+      className={`note-card shape-${note.shape || 'rectangle'} glass-panel pinned-note${dragging ? " dragging" : ""}`}
       style={
         {
           // Use CSS var so ruled-lines background-image stays on top of note color
