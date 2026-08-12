@@ -9,7 +9,6 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "../lib/db"
 import { NoteToast } from "./NoteToast"
 import { useNotifications } from "../lib/useNotifications"
-import { Bell, BellOff } from "lucide-react"
 
 interface NotePosition {
   left: string
@@ -23,9 +22,10 @@ interface NoteWallProps {
   mode: "public" | "private"
   noteFont?: string
   defaultNoteColor?: string
+  layoutMode?: "wall" | "timeline"
 }
 
-export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteColor }) => {
+export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteColor, layoutMode = "wall" }) => {
   const queryClient = useQueryClient()
   const [positions, setPositions] = useState<Record<string, NotePosition>>({})
   const [toast, setToast] = useState<{ author: string; preview: string } | null>(null)
@@ -173,29 +173,20 @@ export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteC
   }
 
   return (
-    <div className="wall-container animate-fade-in">
-      {allNotes.map((note) => {
-        const pos = positions[note.id as string]
-        if (!pos) return null
-        return <NoteCard key={note.id} note={note} pos={pos} noteFont={noteFont} />
-      })}
-
-      {/* Bell toggle — only on public wall */}
-      {mode === "public" && (
-        <button
-          onClick={async () => {
-            if (permission === "default") await requestPermission()
-            else setNotifEnabled(!notifEnabled)
-          }}
-          className="bell-toggle"
-          title={notifEnabled ? "Mute new note alerts" : "Enable new note alerts"}
-          aria-label={notifEnabled ? "Disable notifications" : "Enable notifications"}
-        >
-          {notifEnabled
-            ? <Bell size={13} strokeWidth={2.5} />
-            : <BellOff size={13} strokeWidth={2.5} />}
-          <span>{notifEnabled ? "Alerts On" : "Alerts Off"}</span>
-        </button>
+    <div className={layoutMode === "wall" ? "wall-container animate-fade-in" : "timeline-container animate-fade-in"}>
+      {layoutMode === "timeline" ? (
+        <div className="timeline-wrapper">
+          {/* Timeline needs to show newest notes first usually, assuming they are ordered by createdAt desc */}
+          {allNotes.map((note) => (
+            <NoteCard key={note.id} note={note} pos={positions[note.id as string] || { left: "0", top: "0", rotate: "0deg", delay: "0s", zIndex: 1 }} noteFont={noteFont} isTimeline={true} />
+          ))}
+        </div>
+      ) : (
+        allNotes.map((note) => {
+          const pos = positions[note.id as string]
+          if (!pos) return null
+          return <NoteCard key={note.id} note={note} pos={pos} noteFont={noteFont} />
+        })
       )}
 
       {/* In-app toast for new public notes */}
@@ -211,36 +202,6 @@ export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteC
         @keyframes bellTabIn {
           from { opacity: 0; transform: translateY(10px) rotate(-1.5deg); }
           to   { opacity: 1; transform: translateY(0)    rotate(-1.5deg); }
-        }
-        .bell-toggle {
-          position: fixed;
-          bottom: 52px;
-          left: clamp(10px, 2vw, 20px);
-          z-index: 100;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          padding: 5px 12px 7px;
-          font-family: 'Chalkboard SE','Marker Felt','Comic Sans MS',sans-serif;
-          font-size: 0.72rem;
-          font-weight: 700;
-          color: #1c2b3a;
-          background-color: ${notifEnabled ? "#dcfce7" : "#fef9c3"};
-          background-image: repeating-linear-gradient(
-            transparent, transparent 15px,
-            rgba(0,0,0,0.06) 15px, rgba(0,0,0,0.06) 16px
-          );
-          border: none;
-          box-shadow: 2px 4px 10px rgba(0,0,0,0.22), 1px 1px 3px rgba(0,0,0,0.1);
-          cursor: pointer;
-          transform: rotate(-1.5deg);
-          transform-origin: bottom left;
-          animation: bellTabIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
-          transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
-        }
-        .bell-toggle:hover {
-          transform: rotate(0deg) translateY(-2px);
-          box-shadow: 3px 8px 18px rgba(0,0,0,0.28);
         }
       `}</style>
     </div>

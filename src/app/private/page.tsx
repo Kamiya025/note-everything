@@ -143,6 +143,7 @@ function PrivatePageContent() {
           mode="private"
           noteFont={config.noteFont}
           defaultNoteColor={config.defaultNoteColor}
+          layoutMode={config.layoutMode}
         />
       </section>
 
@@ -176,58 +177,6 @@ function PrivatePageContent() {
 
 
       <style>{`
-        @keyframes tabIn {
-          from { opacity: 0; transform: translateY(10px) rotate(1deg); }
-          to   { opacity: 1; transform: translateY(0)    rotate(1deg); }
-        }
-
-        /* Shared tab style */
-        .settings-tab {
-          position: fixed;
-          bottom: 52px;
-          z-index: 100;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          padding: 5px 12px 7px;
-          font-family: 'Chalkboard SE', 'Marker Felt', 'Comic Sans MS', sans-serif;
-          font-size: 0.72rem;
-          font-weight: 700;
-          color: #1c2b3a;
-          background-color: #fef9c3;
-          background-image: repeating-linear-gradient(
-            transparent, transparent 15px,
-            rgba(0,0,0,0.06) 15px, rgba(0,0,0,0.06) 16px
-          );
-          border: none;
-          box-shadow: 2px 4px 10px rgba(0,0,0,0.25), 1px 1px 3px rgba(0,0,0,0.1);
-          cursor: pointer;
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .settings-tab {
-          left: clamp(10px, 2vw, 20px);
-          transform: rotate(1deg);
-          transform-origin: bottom left;
-          animation: tabIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
-        }
-        .settings-tab:hover {
-          transform: rotate(0deg) translateY(-2px);
-          box-shadow: 3px 8px 18px rgba(0,0,0,0.3), 1px 2px 5px rgba(0,0,0,0.12);
-        }
-
-        /* Thumbtacks */
-        .settings-tab-pin {
-          position: absolute; top: -7px; left: 50%;
-          transform: translateX(-50%);
-          display: block; width: 12px; height: 12px; border-radius: 50%;
-          background: radial-gradient(circle at 35% 30%, #d0d0d0 0%, #999 45%, #555 100%);
-          box-shadow: 0 2px 4px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
-        }
-
-        .settings-tab-icon { color: #334155; flex-shrink: 0; }
-        .settings-tab-label { white-space: nowrap; }
-
         /* Join banner */
         .join-banner {
           position: fixed;

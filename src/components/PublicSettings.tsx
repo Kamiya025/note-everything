@@ -1,34 +1,27 @@
 "use client"
 
 import React, { useRef, useState } from "react"
-import { X, Eye, EyeOff, Upload, Check, Wifi } from "lucide-react"
+import { X, Upload, Check, Bell, BellOff } from "lucide-react"
 import {
-  type PrivateWallConfig,
-  type NoteFontKey,
-  type BgType,
-  NOTE_FONTS,
-  BG_PRESETS,
-  saveConfig,
-  clearUnlocked,
-} from "../lib/privateConfig"
+  type PublicWallConfig,
+  savePublicConfig,
+} from "../lib/publicConfig"
+import { BG_PRESETS, NOTE_FONTS, NoteFontKey } from "../lib/privateConfig"
+import { useNotifications } from "../lib/useNotifications"
 
-interface PrivateSettingsProps {
-  config: PrivateWallConfig
-  onSave: (config: PrivateWallConfig) => void
+interface PublicSettingsProps {
+  config: PublicWallConfig
+  onSave: (config: PublicWallConfig) => void
   onClose: () => void
-  onOpenShare?: () => void
 }
 
-export function PrivateSettings({ config, onSave, onClose, onOpenShare }: PrivateSettingsProps) {
-  const [draft, setDraft] = useState<PrivateWallConfig>({ ...config })
-  const [showPin, setShowPin] = useState(false)
-  const [newPin, setNewPin] = useState("")
-  const [confirmPin, setConfirmPin] = useState("")
-  const [pinError, setPinError] = useState("")
+export function PublicSettings({ config, onSave, onClose }: PublicSettingsProps) {
+  const [draft, setDraft] = useState<PublicWallConfig>({ ...config })
   const [saved, setSaved] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const { notify, enabled: notifEnabled, setEnabled: setNotifEnabled, permission, requestPermission } = useNotifications()
 
-  const set = <K extends keyof PrivateWallConfig>(key: K, value: PrivateWallConfig[K]) =>
+  const set = <K extends keyof PublicWallConfig>(key: K, value: PublicWallConfig[K]) =>
     setDraft((d) => ({ ...d, [key]: value }))
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,23 +40,7 @@ export function PrivateSettings({ config, onSave, onClose, onOpenShare }: Privat
   }
 
   const handleSave = () => {
-    // Validate PIN change
-    if (newPin) {
-      if (!/^\d{4}$/.test(newPin)) {
-        setPinError("PIN must be exactly 4 digits.")
-        return
-      }
-      if (newPin !== confirmPin) {
-        setPinError("PINs do not match.")
-        return
-      }
-      draft.pin = newPin
-      // Force re-unlock since PIN changed
-      clearUnlocked()
-    }
-
-    setPinError("")
-    saveConfig(draft)
+    savePublicConfig(draft)
     onSave(draft)
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
@@ -77,26 +54,13 @@ export function PrivateSettings({ config, onSave, onClose, onOpenShare }: Privat
 
         {/* Header */}
         <div className="settings-header">
-          <h2 className="settings-title">⚙ Wall Settings</h2>
+          <h2 className="settings-title">⚙ Public Wall Settings</h2>
           <button onClick={onClose} className="settings-close" aria-label="Close settings">
             <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
         <div className="settings-body">
-          {/* Wall Name */}
-          <section className="settings-section">
-            <label className="settings-label">Wall Name</label>
-            <input
-              type="text"
-              className="settings-input"
-              value={draft.wallName}
-              onChange={(e) => set("wallName", e.target.value)}
-              maxLength={30}
-              placeholder="Private"
-            />
-          </section>
-
           {/* Background */}
           <section className="settings-section">
             <label className="settings-label">Background</label>
@@ -141,7 +105,7 @@ export function PrivateSettings({ config, onSave, onClose, onOpenShare }: Privat
 
           {/* Note Font */}
           <section className="settings-section">
-            <label className="settings-label">Note Font</label>
+            <label className="settings-label">Default Note Font</label>
             <div className="font-options">
               {(Object.entries(NOTE_FONTS) as [NoteFontKey, { label: string; css: string }][]).map(([key, { label, css }]) => (
                 <button
@@ -182,7 +146,7 @@ export function PrivateSettings({ config, onSave, onClose, onOpenShare }: Privat
           </section>
 
           {/* Layout Mode */}
-          <section className="settings-section">
+          <section className="settings-section" style={{ borderTop: "1px dashed rgba(0,0,0,0.1)", paddingTop: "12px", marginTop: "12px" }}>
             <label className="settings-label">Layout</label>
             <div className="font-options">
               <button
@@ -200,82 +164,45 @@ export function PrivateSettings({ config, onSave, onClose, onOpenShare }: Privat
             </div>
           </section>
 
-          {/* PIN */}
-          <section className="settings-section">
-            <label className="settings-label">PIN Lock</label>
-            <p className="settings-hint">
-              {config.pin ? "PIN is set. Enter a new one to change it, or leave blank to keep current." : "Set a 4-digit PIN to protect this wall."}
-            </p>
-            <div className="pin-row">
-              <input
-                type={showPin ? "text" : "password"}
-                inputMode="numeric"
-                className="settings-input pin-input"
-                value={newPin}
-                onChange={(e) => { setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4)); setPinError("") }}
-                placeholder={config.pin ? "New PIN (optional)" : "New PIN"}
-                maxLength={4}
-              />
-              <button onClick={() => setShowPin((v) => !v)} className="pin-eye" aria-label="Toggle PIN visibility">
-                {showPin ? <EyeOff size={14} strokeWidth={2} /> : <Eye size={14} strokeWidth={2} />}
+          {/* Notification Alert */}
+          <section className="settings-section" style={{ borderTop: "1px dashed rgba(0,0,0,0.1)", paddingTop: "12px", marginTop: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <label className="settings-label">Notification Alerts</label>
+                <p className="settings-hint">Get a pop-up alert when someone adds a note.</p>
+              </div>
+              <button
+                onClick={async () => {
+                  if (permission === "default") await requestPermission()
+                  else setNotifEnabled(!notifEnabled)
+                }}
+                className="font-option font-option-active"
+                style={{ background: notifEnabled ? "#dcfce7" : "#f1f5f9", display: "flex", alignItems: "center", gap: "6px", width: "auto" }}
+              >
+                {notifEnabled ? <Bell size={14} strokeWidth={2.5} /> : <BellOff size={14} strokeWidth={2.5} />}
+                {notifEnabled ? "On" : "Off"}
               </button>
             </div>
-            {newPin && (
-              <input
-                type="password"
-                inputMode="numeric"
-                className="settings-input"
-                value={confirmPin}
-                onChange={(e) => { setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 4)); setPinError("") }}
-                placeholder="Confirm PIN"
-                maxLength={4}
-                style={{ marginTop: "6px" }}
-              />
-            )}
-            {pinError && <p className="pin-err-msg">{pinError}</p>}
-            {config.pin && (
-              <button
-                className="pin-clear-btn"
-                onClick={() => {
-                  if (!confirm("Remove PIN protection?")) return
-                  setDraft((d) => ({ ...d, pin: "" }))
-                  setNewPin("")
-                  setConfirmPin("")
-                }}
-              >
-                Remove PIN
-              </button>
-            )}
           </section>
-
-          {/* LAN Sync */}
-          {onOpenShare && (
-            <section className="settings-section" style={{ marginTop: "4px", borderTop: "1px dashed rgba(0,0,0,0.1)", paddingTop: "12px" }}>
-              <label className="settings-label">LAN Sync / Share</label>
-              <p className="settings-hint">Sync notes across devices on your local network.</p>
-              <button
-                className="settings-cancel"
-                style={{ width: "fit-content", display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  onOpenShare()
-                }}
-              >
-                <Wifi size={14} strokeWidth={2} /> Open QR / Share
-              </button>
-            </section>
-          )}
         </div>
 
         {/* Footer */}
         <div className="settings-footer">
-          <button onClick={onClose} className="settings-cancel">Cancel</button>
-          <button onClick={handleSave} className={`settings-save ${saved ? "settings-saved" : ""}`}>
-            {saved ? <><Check size={14} strokeWidth={2.5} /> Saved!</> : "Save Changes"}
+          <button className="settings-cancel" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="settings-save" onClick={handleSave}>
+            {saved ? (
+              <>
+                <Check size={14} strokeWidth={3} />
+                Saved
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </button>
         </div>
       </div>
-
     </div>
   )
 }

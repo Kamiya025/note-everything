@@ -11,6 +11,7 @@ export interface PrivateWallConfig {
   bgValue: string         // preset name | hex color | base64 data URL
   noteFont: NoteFontKey
   defaultNoteColor: string
+  layoutMode?: "wall" | "timeline"
 }
 
 export const NOTE_FONTS: Record<NoteFontKey, { label: string; css: string }> = {
@@ -61,6 +62,7 @@ export const DEFAULT_CONFIG: PrivateWallConfig = {
   bgValue: "yellow_wall",
   noteFont: "handwriting",
   defaultNoteColor: "#fef9e7",
+  layoutMode: "wall",
 }
 
 export function loadConfig(): PrivateWallConfig {

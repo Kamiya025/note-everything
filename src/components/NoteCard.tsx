@@ -19,9 +19,10 @@ interface NoteCardProps {
   note: Note
   pos: NotePosition
   noteFont?: string
+  isTimeline?: boolean
 }
 
-export function NoteCard({ note, pos, noteFont }: NoteCardProps) {
+export function NoteCard({ note, pos, noteFont, isTimeline }: NoteCardProps) {
   const [dragging, setDragging] = useState(false)
   const [position, setPosition] = useState<{ left: string; top: string } | null>(null)
   const [zIndex, setZIndex] = useState(pos.zIndex)
@@ -46,6 +47,7 @@ export function NoteCard({ note, pos, noteFont }: NoteCardProps) {
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      if (isTimeline) return // Disable dragging in timeline view
       if (e.button !== 0) return
       e.currentTarget.setPointerCapture(e.pointerId)
 
@@ -58,12 +60,12 @@ export function NoteCard({ note, pos, noteFont }: NoteCardProps) {
       setDragging(true)
       setZIndex(9999)
     },
-    []
+    [isTimeline]
   )
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!dragging) return
+      if (isTimeline || !dragging) return
 
       const parent = cardRef.current?.parentElement
       if (!parent) return
@@ -83,13 +85,14 @@ export function NoteCard({ note, pos, noteFont }: NoteCardProps) {
         top: `${clampedTop}px`,
       })
     },
-    [dragging]
+    [dragging, isTimeline]
   )
 
   const onPointerUp = useCallback(() => {
+    if (isTimeline) return
     setDragging(false)
     setZIndex(Math.floor(Math.random() * 50) + 100)
-  }, [])
+  }, [isTimeline])
 
   const left = position?.left ?? pos.left
   const top = position?.top ?? pos.top
@@ -97,14 +100,17 @@ export function NoteCard({ note, pos, noteFont }: NoteCardProps) {
   return (
     <div
       ref={cardRef}
-      className={`note-card shape-${note.shape || 'rectangle'} glass-panel pinned-note${dragging ? " dragging" : ""}`}
+      className={`note-card shape-${note.shape || 'rectangle'} glass-panel ${!isTimeline ? "pinned-note" : "timeline-note"}${dragging ? " dragging" : ""}`}
       style={
         {
           // Use CSS var so ruled-lines background-image stays on top of note color
           "--note-color": note.color?.startsWith("#") ? note.color : "#fef9e7",
-          left,
-          top,
-          "--base-rotate": dragging ? "0deg" : pos.rotate,
+          left: isTimeline ? "auto" : left,
+          top: isTimeline ? "auto" : top,
+          position: isTimeline ? "relative" : "absolute",
+          "--base-rotate": dragging ? "0deg" : (isTimeline ? "0deg" : pos.rotate),
+          transform: isTimeline ? "none" : undefined,
+          margin: isTimeline ? "0 auto" : undefined,
           "--entry-spin": `${physics.entrySpin}deg`,
           "--wobble-dir": physics.wobbleDir,
           "--entry-duration": `${physics.entryDuration}s`,

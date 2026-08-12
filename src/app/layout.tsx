@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   title: 'Wall of Notes',
   description: 'Leave a thought, a quote, or just say hi.',
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
+    icon: '/icons/icon-192x192.png',
+    shortcut: '/icons/icon-192x192.png',
     apple: '/icons/icon-192x192.png',
   },
   appleWebApp: {
