@@ -110,7 +110,7 @@ export function NoteCard({ note, pos, noteFont, isTimeline }: NoteCardProps) {
           position: isTimeline ? "relative" : "absolute",
           "--base-rotate": dragging ? "0deg" : (isTimeline ? "0deg" : pos.rotate),
           transform: isTimeline ? "none" : undefined,
-          margin: isTimeline ? "0 auto" : undefined,
+          margin: isTimeline ? "0" : undefined,
           "--entry-spin": `${physics.entrySpin}deg`,
           "--wobble-dir": physics.wobbleDir,
           "--entry-duration": `${physics.entryDuration}s`,

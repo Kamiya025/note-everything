@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
-import type { Note } from "../types"
+import type { Note, TimelineGroup } from "../types"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import { NoteCard } from "./NoteCard"
@@ -31,15 +31,18 @@ export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteC
   const [toast, setToast] = useState<{ author: string; preview: string } | null>(null)
   const { notify, enabled: notifEnabled, setEnabled: setNotifEnabled, permission, requestPermission } = useNotifications()
 
-  // Fetch remote notes
-  const { data: remoteNotes = [], isLoading: isRemoteLoading } = useQuery<Note[]>({
-    queryKey: ["notes"],
+  // Fetch remote notes (Public mode only)
+  const { data: remoteData, isLoading: isRemoteLoading } = useQuery<{ flat?: Note[]; grouped?: TimelineGroup[] }>({
+    queryKey: ["notes", layoutMode],
     queryFn: async () => {
-      const response = await axios.get("/api/notes")
+      const response = await axios.get(`/api/notes?layout=${layoutMode}`)
       return response.data
     },
     enabled: mode === "public",
   })
+
+  const remoteNotes = remoteData?.flat || []
+  const remoteGrouped = remoteData?.grouped || []
 
   // Fetch private local notes
   const localNotes = useLiveQuery(() => db.notes.toArray()) || []
@@ -97,12 +100,9 @@ export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteC
             }
           })
 
-          // Update React Query Cache
-          queryClient.setQueryData<Note[]>(["notes"], (old) => {
-            if (!old) return [newNote]
-            if (old.some(n => n.id === newNote.id)) return old
-            return [newNote, ...old].slice(0, 200)
-          })
+          // Update React Query Cache for flat notes (and theoretically grouped, but for real-time we'll just invalidate or hack it)
+          // To keep it simple, we can invalidate the query so it regroups properly from the API
+          queryClient.invalidateQueries({ queryKey: ["notes"] })
 
           // Notifications
           if (document.hidden) {
@@ -162,7 +162,11 @@ export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteC
     )
   }
 
-  if (allNotes.length === 0) {
+  const isEmpty = mode === "public" && layoutMode === "timeline" 
+    ? remoteGrouped.length === 0 
+    : allNotes.length === 0;
+
+  if (isEmpty) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full p-8 text-center">
         <p className="text-slate-800 font-semibold text-xl bg-white/40 px-8 py-4 rounded-lg drop-shadow-sm" style={{ textShadow: "1px 1px 0px rgba(255,255,255,0.4)" }}>
@@ -176,10 +180,27 @@ export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteC
     <div className={layoutMode === "wall" ? "wall-container animate-fade-in" : "timeline-container animate-fade-in"}>
       {layoutMode === "timeline" ? (
         <div className="timeline-wrapper">
-          {/* Timeline needs to show newest notes first usually, assuming they are ordered by createdAt desc */}
-          {allNotes.map((note) => (
-            <NoteCard key={note.id} note={note} pos={positions[note.id as string] || { left: "0", top: "0", rotate: "0deg", delay: "0s", zIndex: 1 }} noteFont={noteFont} isTimeline={true} />
-          ))}
+          {mode === "public" ? (
+            remoteGrouped.map((group) => (
+              <div key={group.timeGroup} className="timeline-group">
+                <div className="timeline-divider">
+                  <span className="timeline-group-badge">{group.label}</span>
+                </div>
+                <div className="timeline-group-grid">
+                  {group.notes.map((note) => (
+                    <NoteCard key={note.id} note={note} pos={positions[note.id as string] || { left: "0", top: "0", rotate: "0deg", delay: "0s", zIndex: 1 }} noteFont={noteFont} isTimeline={true} />
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            // Private mode fallback (ungrouped)
+            <div className="timeline-group-grid">
+              {allNotes.map((note) => (
+                <NoteCard key={note.id} note={note} pos={positions[note.id as string] || { left: "0", top: "0", rotate: "0deg", delay: "0s", zIndex: 1 }} noteFont={noteFont} isTimeline={true} />
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         allNotes.map((note) => {

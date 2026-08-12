@@ -24,15 +24,15 @@ export function Footer() {
     staleTime: 60_000,
   })
 
-  const { data: notes = [] } = useQuery<Note[]>({
-    queryKey: ["notes"],
+  const { data: notesData } = useQuery<{ flat?: Note[] }>({
+    queryKey: ["notes", "wall"], // match NoteWall's default queryKey to share cache
     queryFn: async () => {
-      const res = await axios.get("/api/notes")
+      const res = await axios.get("/api/notes?layout=wall")
       return res.data
     },
   })
 
-  const lastNote = notes[0]
+  const lastNote = notesData?.flat?.[0]
 
   useEffect(() => {
     if (visitorData) setVisitorCount(visitorData.count)

@@ -1,7 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '../../../lib/supabase';
+import dayjs from 'dayjs';
+import isToday from 'dayjs/plugin/isToday';
+import { TimelineGroup } from '../../../types';
 
-export async function GET() {
+dayjs.extend(isToday);
+
+export async function GET(request: NextRequest) {
+  const layout = request.nextUrl.searchParams.get('layout') || 'wall';
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase is not configured' }, { status: 500 });
   }
@@ -15,7 +21,43 @@ export async function GET() {
 
     if (error) throw error;
     
-    return NextResponse.json(data);
+    if (layout === 'wall') {
+      return NextResponse.json({
+        flat: data,
+        grouped: undefined
+      });
+    }
+
+    // Group notes by day for the Timeline view (only when layout=timeline)
+    const groupedMap = new Map<string, any>();
+    data.forEach(note => {
+      const d = dayjs(note.createdAt);
+      // Create a sorting key like "YYYY-MM-DD"
+      const timeGroup = d.format('YYYY-MM-DD');
+      
+      if (!groupedMap.has(timeGroup)) {
+        // Create a human-readable label
+        let label = d.format('DD/MM/YYYY');
+        if (d.isToday()) {
+          label = 'Today';
+        }
+        
+        groupedMap.set(timeGroup, {
+          timeGroup,
+          label,
+          notes: []
+        });
+      }
+      
+      groupedMap.get(timeGroup).notes.push(note);
+    });
+
+    const grouped: TimelineGroup[] = Array.from(groupedMap.values());
+
+    return NextResponse.json({
+      flat: undefined, // Save payload size by not sending flat when timeline is requested
+      grouped: grouped
+    });
   } catch (error) {
     console.error('API Error fetching notes:', error);
     return NextResponse.json({ error: 'Failed to fetch notes' }, { status: 500 });

@@ -36,11 +36,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
       return response.data as Note
     },
     onSuccess: (data) => {
-      queryClient.setQueryData<Note[]>(["notes"], (old) => {
-        if (!old) return [data]
-        if (old.some((n) => n.id === data.id)) return old
-        return [data, ...old].slice(0, 200)
-      })
+      queryClient.invalidateQueries({ queryKey: ["notes"] })
       sendTelegramNotification(data.content, data.author).catch(console.error)
       setContent("")
       setAuthor("")

@@ -1582,3 +1582,49 @@ textarea.sticky-input {
 }
 .settings-save:hover { background: #0f172a; }
 .settings-saved { background: #16a34a !important; }
+
+/* ─── Timeline Groups ─────────────────────────────────── */
+.timeline-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.timeline-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0 2rem 0;
+  position: relative;
+}
+
+.timeline-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(to right, transparent, transparent 5px, rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 10px);
+  z-index: 1;
+}
+
+.timeline-group-badge {
+  background: #fefce8;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-radius: 20px;
+  padding: 4px 16px;
+  font-family: 'Chalkboard SE', 'Marker Felt', 'Comic Sans MS', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1c2b3a;
+  z-index: 2;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+}
+
+.timeline-group-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
