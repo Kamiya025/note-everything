@@ -25,6 +25,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         flat: data,
         grouped: undefined
+      }, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59'
+        }
       });
     }
 
@@ -57,6 +61,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       flat: undefined, // Save payload size by not sending flat when timeline is requested
       grouped: grouped
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59'
+      }
     });
   } catch (error) {
     console.error('API Error fetching notes:', error);
