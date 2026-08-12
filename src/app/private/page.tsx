@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, Suspense } from "react"
 import { Settings, Wifi } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { NoteWall } from "../../components/NoteWall"
@@ -19,7 +19,7 @@ import { useLiveQuery } from "dexie-react-hooks"
 import axios from "axios"
 import type { Note } from "../../types"
 
-export default function PrivatePage() {
+function PrivatePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [config, setConfig] = useState<PrivateWallConfig | null>(null)
@@ -273,5 +273,13 @@ export default function PrivatePage() {
         />
       )}
     </MainLayout>
+  )
+}
+
+export default function PrivatePage() {
+  return (
+    <Suspense fallback={null}>
+      <PrivatePageContent />
+    </Suspense>
   )
 }
