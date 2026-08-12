@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <MainLayout>
       <section>
-        <NoteWall />
+        <NoteWall mode="public" />
       </section>
     </MainLayout>
   )

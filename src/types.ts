@@ -4,6 +4,7 @@ export interface Note {
   author: string;
   color: string; // Supports hex colors for custom color picking
   createdAt: any; // Firestore Timestamp
+  isPrivate?: boolean;
 }
 
 export const PRESET_COLORS = [

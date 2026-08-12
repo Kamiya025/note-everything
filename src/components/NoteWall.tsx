@@ -5,6 +5,8 @@ import type { Note } from "../types"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import { NoteCard } from "./NoteCard"
+import { useLiveQuery } from "dexie-react-hooks"
+import { db } from "../lib/db"
 
 interface NotePosition {
   left: string
@@ -14,27 +16,40 @@ interface NotePosition {
   zIndex: number
 }
 
-export const NoteWall: React.FC = () => {
+interface NoteWallProps {
+  mode: "public" | "private"
+  noteFont?: string
+  defaultNoteColor?: string
+}
+
+export const NoteWall: React.FC<NoteWallProps> = ({ mode, noteFont, defaultNoteColor }) => {
   const queryClient = useQueryClient()
   const [positions, setPositions] = useState<Record<string, NotePosition>>({})
 
-  // Fetch initial notes via API and React Query
-  const { data: notes = [], isLoading } = useQuery<Note[]>({
+  // Fetch remote notes
+  const { data: remoteNotes = [], isLoading: isRemoteLoading } = useQuery<Note[]>({
     queryKey: ["notes"],
     queryFn: async () => {
       const response = await axios.get("/api/notes")
       return response.data
     },
+    enabled: mode === "public",
   })
+
+  // Fetch private local notes
+  const localNotes = useLiveQuery(() => db.notes.toArray()) || []
+
+  const allNotes = mode === "public" ? remoteNotes : localNotes
+  const isLoading = mode === "public" ? isRemoteLoading : false
 
   // Set positions for notes
   useEffect(() => {
-    if (!notes.length) return
+    if (!allNotes.length) return
 
     setPositions((prevPositions) => {
       const newPositions = { ...prevPositions }
       let hasNewPositions = false
-      notes.forEach((note) => {
+      allNotes.forEach((note) => {
         if (!newPositions[note.id!]) {
           newPositions[note.id!] = {
             left: `${5 + Math.random() * 75}%`,
@@ -48,11 +63,11 @@ export const NoteWall: React.FC = () => {
       })
       return hasNewPositions ? newPositions : prevPositions
     })
-  }, [notes])
+  }, [allNotes])
 
   // Setup Supabase Realtime subscription just to update React Query cache
   useEffect(() => {
-    if (!supabase) return
+    if (!supabase || mode === "private") return
 
     const channel = supabase
       .channel("public:notes")
@@ -131,7 +146,7 @@ export const NoteWall: React.FC = () => {
     )
   }
 
-  if (notes.length === 0) {
+  if (allNotes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full p-8 text-center">
         <p className="text-slate-800 font-semibold text-xl bg-white/40 px-8 py-4 rounded-lg drop-shadow-sm" style={{ textShadow: "1px 1px 0px rgba(255,255,255,0.4)" }}>
@@ -143,11 +158,11 @@ export const NoteWall: React.FC = () => {
 
   return (
     <div className="wall-container animate-fade-in">
-      {notes.map((note) => {
+      {allNotes.map((note) => {
         const pos = positions[note.id as string]
         if (!pos) return null
 
-        return <NoteCard key={note.id} note={note} pos={pos} />
+        return <NoteCard key={note.id} note={note} pos={pos} noteFont={noteFont} />
       })}
     </div>
   )

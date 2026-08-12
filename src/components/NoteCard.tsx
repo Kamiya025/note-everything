@@ -2,6 +2,7 @@
 import React, { useCallback, useMemo, useRef, useState } from "react"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import { Lock } from "lucide-react"
 import type { Note } from "../types"
 
 dayjs.extend(relativeTime)
@@ -17,9 +18,10 @@ interface NotePosition {
 interface NoteCardProps {
   note: Note
   pos: NotePosition
+  noteFont?: string
 }
 
-export function NoteCard({ note, pos }: NoteCardProps) {
+export function NoteCard({ note, pos, noteFont }: NoteCardProps) {
   const [dragging, setDragging] = useState(false)
   const [position, setPosition] = useState<{ left: string; top: string } | null>(null)
   const [zIndex, setZIndex] = useState(pos.zIndex)
@@ -116,6 +118,7 @@ export function NoteCard({ note, pos }: NoteCardProps) {
           userSelect: "none",
           touchAction: "none",
 
+          fontFamily: noteFont ?? undefined,
         } as React.CSSProperties
       }
       onPointerDown={onPointerDown}
@@ -125,7 +128,10 @@ export function NoteCard({ note, pos }: NoteCardProps) {
     >
       <div className="note-content">{note.content}</div>
       <div className="note-footer">
-        <span className="note-author">- {note.author}</span>
+        <span className="note-author" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {note.isPrivate && <span title="Private Note (Device-only)" style={{ display: 'flex', alignItems: 'center' }}><Lock size={12} style={{ opacity: 0.6 }} /></span>}
+          - {note.author}
+        </span>
         <span>
           {note.createdAt ? dayjs(note.createdAt).fromNow() : "Just now"}
         </span>

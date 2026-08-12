@@ -1,19 +1,27 @@
 "use client"
 import React, { useState } from "react"
-import { Send, Palette, Loader2 } from "lucide-react"
+import { Send, Palette, Loader2, Lock } from "lucide-react"
 import { sendTelegramNotification } from "../lib/telegram"
 import { PRESET_COLORS } from "../types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import type { Note } from "../types"
-
+import { db } from "../lib/db"
+import { usePathname } from "next/navigation"
+import { loadConfig } from "../lib/privateConfig"
 interface NoteFormProps {
   onClose: () => void
 }
 
 export function NoteForm({ onClose }: NoteFormProps) {
+  const pathname = usePathname()
+  const isPrivate = pathname === "/private"
+
+  // On the private wall, start with the user-configured default color
+  const initialColor = isPrivate ? loadConfig().defaultNoteColor : PRESET_COLORS[0]
   const [content, setContent] = useState("")
-  const [color, setColor] = useState<string>(PRESET_COLORS[0])
+  const [author, setAuthor] = useState("")
+  const [color, setColor] = useState<string>(initialColor)
   const queryClient = useQueryClient()
 
   const { mutate: addNote, isPending: isSubmitting } = useMutation({
@@ -33,6 +41,7 @@ export function NoteForm({ onClose }: NoteFormProps) {
       })
       sendTelegramNotification(data.content, data.author).catch(console.error)
       setContent("")
+      setAuthor("")
       setColor(PRESET_COLORS[0])
       onClose()
     },
@@ -42,14 +51,37 @@ export function NoteForm({ onClose }: NoteFormProps) {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!content.trim()) return
-    addNote({
-      content: content.trim(),
-      author: "Anonymous",
-      color,
-    })
+    
+    if (isPrivate) {
+      const newNote: Note = {
+        id: crypto.randomUUID(),
+        content: content.trim(),
+        author: author.trim() || "Me",
+        color,
+        createdAt: new Date().toISOString(),
+        isPrivate: true,
+      };
+      
+      try {
+        await db.notes.add(newNote);
+        setContent("")
+        setAuthor("")
+        setColor(PRESET_COLORS[0])
+        onClose()
+      } catch (err) {
+        console.error("Error adding private note: ", err)
+        alert("Failed to add private note.")
+      }
+    } else {
+      addNote({
+        content: content.trim(),
+        author: author.trim() || "Anonymous",
+        color,
+      })
+    }
   }
 
   return (
@@ -84,7 +116,20 @@ export function NoteForm({ onClose }: NoteFormProps) {
           <div className="form-char-count">{content.length}/150</div>
         </div>
 
-        {/* Author + Color row */}
+        {/* Signature + Color row */}
+        <div className="form-row">
+          {/* Optional signature */}
+          <input
+            type="text"
+            className="form-input"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            placeholder="— sign your name (optional)"
+            maxLength={40}
+            disabled={isSubmitting}
+            aria-label="Signature (optional)"
+          />
+        </div>
         <div className="form-row">
           <div className="form-colors">
             <Palette size={16} className="form-palette-icon" />
