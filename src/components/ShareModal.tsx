@@ -4,8 +4,9 @@ import axios from "axios"
 import { Camera, Check, Clock, Copy, QrCode, Wifi, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import QRCode from "qrcode"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import type { Note } from "../types"
+import { QRScanner } from "./QRScanner"
 
 interface ShareModalProps {
   /** The host device's current local notes */
@@ -69,63 +70,15 @@ export function ShareModal({ notes, onClose }: ShareModalProps) {
     return () => clearInterval(id)
   }, [url])
 
-  // QR Scanner initialization
-  useEffect(() => {
-    if (mode === "scan") {
-      let isMounted = true
-      let html5QrCode: any = null
+  const handleScanSuccess = useCallback((scannedToken: string) => {
+    router.replace(`/private?share=${scannedToken}`)
+    onClose()
+  }, [router, onClose])
 
-      const startScanner = async () => {
-        try {
-          const { Html5Qrcode } = await import("html5-qrcode")
-          if (!isMounted) return
-
-          html5QrCode = new Html5Qrcode("qr-reader")
-          await html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            (text) => {
-              if (html5QrCode?.isScanning) {
-                html5QrCode.stop().catch(() => {})
-              }
-              const match = text.match(/share=([a-zA-Z0-9]+)/)
-              if (match && match[1]) {
-                router.replace(`/private?share=${match[1]}`)
-                onClose()
-              } else {
-                alert(
-                  "Invalid QR code! Doesn't seem to be a Note Everything session.",
-                )
-                setMode("share")
-              }
-            },
-            () => {}, // ignore scan errors (they happen every frame)
-          )
-        } catch (err) {
-          console.error("Camera error", err)
-          if (isMounted) {
-            alert(
-              "Could not start camera. Make sure you granted permissions and are using HTTPS or localhost.",
-            )
-            setMode("share")
-          }
-        }
-      }
-
-      // Small delay to ensure #qr-reader is in the DOM
-      setTimeout(startScanner, 100)
-
-      return () => {
-        isMounted = false
-        if (html5QrCode && html5QrCode.isScanning) {
-          html5QrCode
-            .stop()
-            .then(() => html5QrCode.clear())
-            .catch(() => {})
-        }
-      }
-    }
-  }, [mode, router, onClose])
+  const handleScanError = useCallback((msg: string) => {
+    alert(msg)
+    setMode("share")
+  }, [])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url)
@@ -202,7 +155,7 @@ export function ShareModal({ notes, onClose }: ShareModalProps) {
               />
             </>
           ) : (
-            <div id="qr-reader" style={{ width: "100%", border: "none" }} />
+            <QRScanner onScanSuccess={handleScanSuccess} onError={handleScanError} />
           )}
         </div>
 
