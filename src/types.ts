@@ -10,6 +10,12 @@ export interface Note {
   shape?: NoteShape;
 }
 
+export interface TimelineGroup {
+  timeGroup: string;
+  label: string;
+  notes: Note[];
+}
+
 export const PRESET_COLORS = [
   "#fef08a", // Yellow pastel
   "#fbcfe8", // Pink pastel
