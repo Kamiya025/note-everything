@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useState } from "react"
-import { X, Eye, EyeOff, Upload, Check } from "lucide-react"
+import { X, Eye, EyeOff, Upload, Check, Wifi } from "lucide-react"
 import {
   type PrivateWallConfig,
   type NoteFontKey,
@@ -16,9 +16,10 @@ interface PrivateSettingsProps {
   config: PrivateWallConfig
   onSave: (config: PrivateWallConfig) => void
   onClose: () => void
+  onOpenShare?: () => void
 }
 
-export function PrivateSettings({ config, onSave, onClose }: PrivateSettingsProps) {
+export function PrivateSettings({ config, onSave, onClose, onOpenShare }: PrivateSettingsProps) {
   const [draft, setDraft] = useState<PrivateWallConfig>({ ...config })
   const [showPin, setShowPin] = useState(false)
   const [newPin, setNewPin] = useState("")
@@ -227,6 +228,24 @@ export function PrivateSettings({ config, onSave, onClose }: PrivateSettingsProp
               </button>
             )}
           </section>
+
+          {/* LAN Sync */}
+          {onOpenShare && (
+            <section className="settings-section" style={{ marginTop: "4px", borderTop: "1px dashed rgba(0,0,0,0.1)", paddingTop: "12px" }}>
+              <label className="settings-label">LAN Sync / Share</label>
+              <p className="settings-hint">Sync notes across devices on your local network.</p>
+              <button
+                className="settings-cancel"
+                style={{ width: "fit-content", display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  onOpenShare()
+                }}
+              >
+                <Wifi size={14} strokeWidth={2} /> Open QR / Share
+              </button>
+            </section>
+          )}
         </div>
 
         {/* Footer */}
