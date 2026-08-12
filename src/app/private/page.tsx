@@ -111,10 +111,15 @@ function PrivatePageContent() {
     return () => { if (pollRef.current) clearInterval(pollRef.current) }
   }, [unlocked, searchParams, router])
 
-  // ── Merge incoming notes from Device B (ShareModal host side) ────
-  const handleMerge = async (incoming: Note[]) => {
-    await db.notes.bulkPut(incoming)
-  }
+  // ── Push updates to session if Device B edits/creates notes ─────
+  const prevLocalRef = useRef(localNotes)
+  useEffect(() => {
+    if (!joinTokenRef.current || !unlocked) return
+    if (prevLocalRef.current === localNotes) return
+    prevLocalRef.current = localNotes
+
+    axios.patch("/api/share", { token: joinTokenRef.current, notes: localNotes }).catch(() => {})
+  }, [localNotes, unlocked])
 
   if (!config) return null
 
@@ -268,7 +273,6 @@ function PrivatePageContent() {
       {showShare && (
         <ShareModal
           notes={localNotes}
-          onMerge={handleMerge}
           onClose={() => setShowShare(false)}
         />
       )}

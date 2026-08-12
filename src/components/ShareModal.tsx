@@ -10,15 +10,13 @@ import type { Note } from "../types"
 interface ShareModalProps {
   /** The host device's current local notes */
   notes: Note[]
-  /** Called whenever the session brings in new notes to merge locally */
-  onMerge: (incoming: Note[]) => void
   onClose: () => void
 }
 
 const EXPIRE_MS = 10 * 60 * 1000
 const POLL_INTERVAL = 5000 // 5 seconds
 
-export function ShareModal({ notes, onMerge, onClose }: ShareModalProps) {
+export function ShareModal({ notes, onClose }: ShareModalProps) {
   const router = useRouter()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [url, setUrl] = useState("")
@@ -27,10 +25,7 @@ export function ShareModal({ notes, onMerge, onClose }: ShareModalProps) {
   const [timeLeft, setTimeLeft] = useState(EXPIRE_MS)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
-  const [syncCount, setSyncCount] = useState(0)
-  const [lastSync, setLastSync] = useState<Date | null>(null)
   const expiresAtRef = useRef<number>(0)
-  const knownIds = useRef<Set<string>>(new Set(notes.map((n) => n.id as string)))
 
   const [mode, setMode] = useState<"share" | "scan">("share")
   const scannerRef = useRef<any>(null)
@@ -45,6 +40,9 @@ export function ShareModal({ notes, onMerge, onClose }: ShareModalProps) {
         expiresAtRef.current = data.expiresAt
         setTimeLeft(data.expiresAt - Date.now())
         setLoading(false)
+
+        // Delegate syncing to page.tsx so it continues in the background even if modal is closed!
+        router.replace(`/private?share=${data.token}`, { scroll: false })
       })
       .catch(() => {
         setError("Failed to create sync session.")
@@ -62,32 +60,6 @@ export function ShareModal({ notes, onMerge, onClose }: ShareModalProps) {
     })
   }, [url])
 
-  // Poll for new notes from Device B
-  const poll = useCallback(async () => {
-    if (!token || expiresAtRef.current < Date.now()) return
-    try {
-      const { data } = await axios.get(`/api/share?token=${token}`)
-      const incoming: Note[] = data.notes.filter(
-        (n: Note) => n.id && !knownIds.current.has(n.id as string)
-      )
-      if (incoming.length > 0) {
-        incoming.forEach((n) => knownIds.current.add(n.id as string))
-        setSyncCount((c) => c + incoming.length)
-        setLastSync(new Date())
-        onMerge(incoming)
-      }
-    } catch {
-      // session may have expired — ignore
-    }
-  }, [token, onMerge])
-
-  useEffect(() => {
-    if (!token) return
-    const id = setInterval(poll, POLL_INTERVAL)
-    return () => clearInterval(id)
-  }, [token, poll])
-
-  // Countdown
   useEffect(() => {
     if (!expiresAtRef.current) return
     const id = setInterval(() => {
@@ -230,15 +202,6 @@ export function ShareModal({ notes, onMerge, onClose }: ShareModalProps) {
             <span className={`share-timer ${timeLeft < 60000 ? "share-timer-urgent" : ""}`}>
               <Clock size={10} strokeWidth={2} />
               {timeLeft > 0 ? `${mins}:${String(secs).padStart(2, "0")}` : "Expired"}
-            </span>
-          )}
-
-          {/* Sync activity */}
-          {syncCount > 0 && (
-            <span className="share-synced">
-              <RefreshCw size={10} strokeWidth={2.5} />
-              +{syncCount} note{syncCount !== 1 ? "s" : ""} received
-              {lastSync ? ` · ${lastSync.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : ""}
             </span>
           )}
         </div>

@@ -96,12 +96,12 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Session expired or not found" }, { status: 404 })
   }
 
-  // Merge incoming notes — existing notes with same ID are kept (first-write-wins)
+  // Merge incoming notes — overwrite existing so edits are synced
   let added = 0
   for (const n of notes) {
-    if (n.id && !session.notes.has(n.id)) {
+    if (n.id) {
+      if (!session.notes.has(n.id)) added++
       session.notes.set(n.id, n)
-      added++
     }
   }
 
