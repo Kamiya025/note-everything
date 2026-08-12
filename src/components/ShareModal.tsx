@@ -101,33 +101,48 @@ export function ShareModal({ notes, onMerge, onClose }: ShareModalProps) {
   useEffect(() => {
     if (mode === "scan") {
       let isMounted = true
-      import("html5-qrcode").then(({ Html5QrcodeScanner }) => {
-        if (!isMounted) return
-        const scanner = new Html5QrcodeScanner(
-          "qr-reader",
-          { fps: 10, qrbox: { width: 250, height: 250 } },
-          false
-        )
-        scannerRef.current = scanner
-        scanner.render(
-          (text) => {
-            scanner.clear()
-            const match = text.match(/share=([a-zA-Z0-9]+)/)
-            if (match && match[1]) {
-              router.replace(`/private?share=${match[1]}`)
-              onClose()
-            } else {
-              alert("Invalid QR code! Doesn't seem to be a Note Everything session.")
-              setMode("share")
-            }
-          },
-          () => {} // ignore scan errors (they happen every frame)
-        )
-      })
+      let html5QrCode: any = null
+
+      const startScanner = async () => {
+        try {
+          const { Html5Qrcode } = await import("html5-qrcode")
+          if (!isMounted) return
+          
+          html5QrCode = new Html5Qrcode("qr-reader")
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (text) => {
+              if (html5QrCode?.isScanning) {
+                html5QrCode.stop().catch(() => {})
+              }
+              const match = text.match(/share=([a-zA-Z0-9]+)/)
+              if (match && match[1]) {
+                router.replace(`/private?share=${match[1]}`)
+                onClose()
+              } else {
+                alert("Invalid QR code! Doesn't seem to be a Note Everything session.")
+                setMode("share")
+              }
+            },
+            () => {} // ignore scan errors (they happen every frame)
+          )
+        } catch (err) {
+          console.error("Camera error", err)
+          if (isMounted) {
+            alert("Could not start camera. Make sure you granted permissions and are using HTTPS or localhost.")
+            setMode("share")
+          }
+        }
+      }
+
+      // Small delay to ensure #qr-reader is in the DOM
+      setTimeout(startScanner, 100)
+
       return () => {
         isMounted = false
-        if (scannerRef.current) {
-          scannerRef.current.clear().catch(() => {})
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {})
         }
       }
     }
