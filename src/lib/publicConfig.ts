@@ -14,7 +14,7 @@ const STORAGE_KEY = "publicWallConfig"
 
 export const DEFAULT_PUBLIC_CONFIG: PublicWallConfig = {
   bgType: "preset",
-  bgValue: "cork", // Default to cork board for public wall
+  bgValue: "yellow_wall", // Default to wall image for public wall
   noteFont: "handwriting",
   defaultNoteColor: "#fef9e7",
   layoutMode: "wall",
