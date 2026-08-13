@@ -44,7 +44,7 @@ export default function Home() {
       >
         <span className="settings-tab-pin" aria-hidden="true" />
         <Settings size={13} strokeWidth={2.5} className="settings-tab-icon" />
-        <span className="settings-tab-label">Settings</span>
+        <span className="settings-tab-label hidden sm:inline">Settings</span>
       </button>
 
       {showSettings && (
