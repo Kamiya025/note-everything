@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFO Tài chính công ty toàn tập — Trình phát khoá học</title>
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f6f7f9; --bg-sunken: #eceef1;
+    --fg: #16181d; --fg-muted: #5b6270; --fg-faint: #8b93a1;
+    --border: #dfe3e8; --accent: #1f6feb;
+    --ok: #067d3d; --warn: #9a6700; --bad: #c1121f;
+    --radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14161a; --bg-alt: #1b1e24; --bg-sunken: #23272e;
+      --fg: #e6e8ec; --fg-muted: #a2aab8; --fg-faint: #767e8c;
+      --border: #2d323a; --accent: #4f9dff;
+      --ok: #4cc38a; --warn: #e0b341; --bad: #ff7b72;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161a; --bg-alt: #1b1e24; --bg-sunken: #23272e;
+    --fg: #e6e8ec; --fg-muted: #a2aab8; --fg-faint: #767e8c;
+    --border: #2d323a; --accent: #4f9dff;
+    --ok: #4cc38a; --warn: #e0b341; --bad: #ff7b72;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border); background: var(--bg-alt);
+    padding: 12px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 650; }
+  header .meta { color: var(--fg-muted); font-size: 13px; }
+  header .spacer { flex: 1; }
+  button {
+    font: inherit; font-size: 13px; padding: 5px 11px; cursor: pointer;
+    background: var(--bg); color: var(--fg);
+    border: 1px solid var(--border); border-radius: 6px;
+  }
+  button:hover { background: var(--bg-sunken); }
+
+  .layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  aside {
+    border-right: 1px solid var(--border); background: var(--bg-alt);
+    max-height: calc(100vh - 53px); overflow-y: auto; position: sticky; top: 0;
+  }
+  @media (max-width: 900px) {
+    aside { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--border); }
+  }
+
+  .searchbar {
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg-alt); z-index: 2;
+  }
+  .searchbar input {
+    width: 100%; padding: 7px 10px; font: inherit; font-size: 14px;
+    background: var(--bg); color: var(--fg);
+    border: 1px solid var(--border); border-radius: 6px;
+  }
+  .progress { margin-top: 8px; font-size: 12px; color: var(--fg-muted); display: flex; align-items: center; gap: 8px; }
+  .progress .bar { flex: 1; height: 5px; background: var(--bg-sunken); border-radius: 3px; overflow: hidden; }
+  .progress .bar > i { display: block; height: 100%; background: var(--ok); width: 0; transition: width .2s; }
+
+  .part { border-bottom: 1px solid var(--border); }
+  .part > h2 {
+    margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--fg-muted); padding: 11px 14px 7px;
+  }
+  .part ol { list-style: none; margin: 0; padding: 0 0 8px; }
+  .part li > button {
+    display: flex; gap: 9px; align-items: baseline; width: 100%; text-align: left;
+    border: 0; border-left: 3px solid transparent; border-radius: 0;
+    padding: 7px 14px 7px 11px; background: none; line-height: 1.4;
+  }
+  .part li > button:hover { background: var(--bg-sunken); }
+  .part li > button[aria-current="true"] {
+    background: var(--bg-sunken); border-left-color: var(--accent); font-weight: 600;
+  }
+  .part li .tick { flex: none; width: 14px; color: var(--fg-faint); font-size: 12px; }
+  .part li[data-done="1"] .tick { color: var(--ok); }
+  .part li .label { flex: 1; font-size: 13.5px; }
+  .part li .dur { flex: none; font-size: 11.5px; color: var(--fg-faint); font-variant-numeric: tabular-nums; }
+  .part li[hidden] { display: none; }
+
+  main { padding: 18px 20px 40px; min-width: 0; }
+  .stage { position: relative; padding-top: 56.25%; background: #000; border-radius: var(--radius); overflow: hidden; }
+  .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  .nowplaying { margin: 14px 0 4px; font-size: 17px; font-weight: 650; }
+  .nowsub { color: var(--fg-muted); font-size: 13px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .controls .spacer { flex: 1; }
+  .hint { color: var(--fg-faint); font-size: 12px; margin-top: 12px; }
+  kbd {
+    font: inherit; font-size: 11px; padding: 1px 5px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--bg-sunken);
+  }
+
+  #diag {
+    margin-top: 18px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg-alt); overflow: hidden;
+  }
+  #diag > summary { padding: 10px 14px; cursor: pointer; font-size: 13.5px; font-weight: 600; }
+  #diag .body { padding: 0 14px 14px; font-size: 13px; }
+  #diag table { width: 100%; border-collapse: collapse; }
+  #diag td { padding: 5px 8px 5px 0; vertical-align: top; border-top: 1px solid var(--border); }
+  #diag td:first-child { width: 64px; font-weight: 650; white-space: nowrap; }
+  #diag .note { color: var(--fg-muted); font-size: 12.5px; }
+  .s-ok { color: var(--ok); } .s-bad { color: var(--bad); } .s-warn { color: var(--warn); }
+  #diag pre {
+    background: var(--bg-sunken); padding: 10px 12px; border-radius: 6px;
+    overflow-x: auto; font-size: 12px; margin: 10px 0 0;
+  }
+  .banner {
+    display: none; margin-top: 16px; padding: 11px 14px; border-radius: var(--radius);
+    border: 1px solid var(--bad); background: var(--bg-alt); font-size: 13.5px;
+  }
+  .banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CFO Tài chính công ty toàn tập</h1>
+  <span class="meta" id="hdrmeta"></span>
+  <span class="spacer"></span>
+  <button id="theme" title="Đổi giao diện sáng/tối">◐ Giao diện</button>
+  <button id="reset" title="Xoá dấu đã xem">Xoá tiến độ</button>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="searchbar">
+      <input id="q" type="search" placeholder="Tìm bài học… (nhấn /)" autocomplete="off">
+      <div class="progress">
+        <span id="ptext">0/0</span>
+        <span class="bar"><i id="pbar"></i></span>
+      </div>
+    </div>
+    <nav id="nav"></nav>
+  </aside>
+
+  <main>
+    <div class="stage"><iframe id="player" title="Trình phát video"
+      allow="accelerometer; gyroscope; encrypted-media; picture-in-picture; fullscreen"
+      allowfullscreen loading="lazy"></iframe></div>
+
+    <div class="nowplaying" id="nowTitle">—</div>
+    <div class="nowsub" id="nowSub">—</div>
+
+    <div class="controls">
+      <button id="prev">← Bài trước</button>
+      <button id="next">Bài sau →</button>
+      <button id="done">✓ Đánh dấu đã xem</button>
+      <span class="spacer"></span>
+      <button id="open">Mở tab mới</button>
+      <button id="copy">Sao chép link</button>
+    </div>
+
+    <div class="banner" id="banner"></div>
+
+    <div class="hint">
+      Phím tắt: <kbd>J</kbd>/<kbd>K</kbd> bài sau/trước · <kbd>M</kbd> đánh dấu đã xem · <kbd>/</kbd> tìm kiếm
+    </div>
+
+    <details id="diag">
+      <summary>Chẩn đoán kết nối (mở khi video không phát)</summary>
+      <div class="body">
+        <table id="diagtbl"><tbody><tr><td colspan="2">Đang kiểm tra…</td></tr></tbody></table>
+        <div id="diagfix"></div>
+      </div>
+    </details>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+const LIBRARY = 576130;
+const CDN_ZONE = "vz-4ab9d7cc-642.b-cdn.net";
+const QS = "autoplay=false&loop=true&muted=false&preload=true&responsive=true";
+const STORE_KEY = "vnvalue.cfo.watched.v1";
+const LAST_KEY  = "vnvalue.cfo.last.v1";
+const THEME_KEY = "vnvalue.cfo.theme";
+
+// Nguon du lieu: .github/video-grouped.json
+// Thoi luong (phut) lay tu metadata Bunny Stream, lam tron.
+const COURSE = [
+  { part: "MỞ ĐẦU: Tài chính minh bạch & An toàn trong kỷ nguyên mới", videos: [
+    ["A. Tư duy minh bạch, bài bản trong kỷ nguyên mới", "5360bb97-f318-4b12-a448-0c6b82cc9274", 37],
+    ["B. Những sai lầm & rào cản tiến tới minh bạch hóa", "d2b36795-a02a-465a-973b-09d98fb186a9", 43],
+    ["C. Phương pháp và kỹ thuật trở nên minh bạch, bài bản", "d51cb2e9-7737-463d-885a-b36168ed1c25", 27]
+  ]},
+  { part: "PHẦN 1: Tư duy & Kiến thức Tài chính Hiện đại", videos: [
+    ["P1-Bài 01: Tài chính minh bạch luôn có lợi", "fa56f5cf-7385-49d1-8e93-ab2fab23440a", 31],
+    ["P1-Bài 02: Suy ngẫm về giá trị công ty và giá trị thu hồi vốn", "1398d753-d0f4-4759-b6e5-140ba00e5489", 13],
+    ["P1-Bài 03: Tài chính - Kế toán - Kế toán quản trị - Báo cáo thuế", "f9897484-0fbe-48fe-9628-659eae7ce8ad", 36],
+    ["P1-Bài 04: Nguồn vốn & Nỗ lực tạo sinh vốn kinh doanh", "f7289b1e-0967-4df8-90c2-90ef7b43f5c7", 54],
+    ["P1-Bài 05: Quy mô vốn, Đòn bẩy tài chính, Tư duy tài chính toàn diện & hiện đại", "a99e07b9-83cc-4279-abe4-b1f877123bc0", 37],
+    ["P1-Bài 06: Hoạch định và làm chủ công thức lợi nhuận trong thời kỳ mới", "109cb6ac-f89b-4f77-9905-beed99993dfb", 44],
+    ["P1-Bài 07.01: Chiến thuật tăng giá trị công ty (P1)", "baa22f4a-3e4e-45d9-a0ab-d7c3a95afe20", 38],
+    ["P1-Bài 07.02: Chiến thuật tăng giá trị công ty và tối ưu thuế (P2)", "dd05f447-fc5f-49a1-b6f0-3b7eb2da8604", 31],
+    ["P1-Bài 08: Xác định mục tiêu tài chính chiến lược và tổng kết Phần 1", "fc1d086e-4b8a-4578-bd67-7232c4f77027", 14]
+  ]},
+  { part: "PHẦN 2: Báo cáo Tài chính & Bộ KPI đo lường sức khỏe tài chính", videos: [
+    ["P2-Bài 09: Làm chủ báo cáo tài chính (1) - Báo cáo tình hình tài chính", "7c8e64f2-7136-492b-a587-1fc76d0c5159", 68],
+    ["P2-Bài 10: Làm chủ báo cáo tài chính (2) - Báo cáo kết quả kinh doanh", "c65044d6-dd59-4900-a2c2-a85f45687bad", 40],
+    ["P2-Bài 11: Dự báo & Quản trị tối ưu dòng tiền", "b2ef99ea-6f61-450b-bc3f-0264fd783e55", 47],
+    ["P2-Bài 12: Kết cấu tài sản, Nguồn vốn, Bộ KPI sức khỏe tài chính công ty", "0233afa7-4e5d-4e26-985c-46a8ca3f9978", 32],
+    ["P2-Bài 13: Giải đáp và thảo luận tình huống tại doanh nghiệp", "b57130d7-6adb-4884-89e2-0231440f102b", 63]
+  ]},
+  { part: "PHẦN 3: Setup & Quản trị tài chính dòng tiền", videos: [
+    ["P3-Bài 14: Setup & Đồng bộ danh mục tài chính dòng tiền", "931a0330-4b8e-4c36-ac6d-5e3d02790670", 53],
+    ["P3-Bài 15: Chính sách tín dụng thương mại (Quản trị Nợ chủ động)", "8e62d380-1857-4cf1-ac62-d3da67494430", 34],
+    ["P3-Bài 16: Yêu cầu & Trình tự lập kế hoạch tài chính dòng tiền", "a40a421f-1d3e-421c-a37c-937886463727", 37],
+    ["P3-Bài 17: Biểu mẫu ứng dụng lập mô hình tài chính (Kế hoạch tài chính dòng tiền)", "82d7425b-1b80-4ce8-8afc-1664f127a9a8", 27],
+    ["P3-Bài 18: Tổ chức, CNNV Phòng Tài chính - Kế toán", "9a875538-50b5-40fd-8db3-04d612b56378", 61],
+    ["P3-Bài 19: Quy chuẩn hạch toán, Chất lượng thông tin, Biểu mẫu áp dụng theo sự kiện phát sinh", "524de053-0e08-4d77-b9d1-c2accbe54731", 51],
+    ["P3-Bài 20: Điều hành kế hoạch & Báo cáo tài chính kế toán quản trị hàng tháng", "cf7e13ef-9121-46ae-9fc8-da7b2640d9dc", 21],
+    ["P3-Bài 21: Hướng dẫn soạn thảo quy chế tài chính", "97113331-ce36-43f6-a12f-a37fd6418c42", 23]
+  ]},
+  { part: "PHẦN 4: Kiểm soát nội bộ về doanh thu, chi phí", videos: [
+    ["P4-Bài 22: Kiểm soát nội bộ về Doanh thu, Chi phí", "32261926-ea60-455c-af85-85c2791c157f", 40],
+    ["P4-Bài 23: Quản trị - Tuân thủ thuế - Bảo vệ chi phí giá vốn", "96bb92a8-4c97-4405-ae14-bf1246197078", 41],
+    ["P4-Bài 24: Hồ sơ, thủ tục chi phí nguyên vật liệu, mua hàng hóa, TSCĐ, CCDC", "257b5ea5-910a-457b-b63d-781cd76b285e", 25],
+    ["P4-Bài 25: Hồ sơ, thủ tục chi phí nhân sự tiền lương, khoán việc", "31cc6ee9-b361-44e3-9eb0-638c12be1c35", 34],
+    ["P4-Bài 26: Chi phí dự phòng, trích trước, xử lý thiệt hại", "8b139922-85f4-4025-a2da-64cc9113be81", 33],
+    ["P4-Bài 27: Vốn hóa & Chi phí hóa sở hữu trí tuệ và giải phóng dòng tiền", "e25cb0ac-3c63-4fad-9393-76e6a2a6e609", 21],
+    ["P4-Bài 28: Quản trị thuế chủ động (1) - Lập kế hoạch thuế", "c491dcc7-545e-427e-ab2a-54b3861919d7", 11],
+    ["P4-Bài 29: Quản trị thuế chủ động (2) - Tờ khai thuế, Báo cáo nhanh, Hướng dẫn biểu mẫu", "500a923b-08b3-43f7-b467-f4cddd0e75a6", 27],
+    ["P4-Bài 30: Hỏi đáp, thảo luận, chia sẻ từ học viên", "5a4e51b1-76b8-4e31-b175-1385038fa6a8", 44]
+  ]}
+];
+
+const FLAT = [];
+COURSE.forEach(function (p, pi) {
+  p.videos.forEach(function (v) {
+    FLAT.push({ i: FLAT.length, pi: pi, part: p.part, title: v[0], id: v[1], mins: v[2] });
+  });
+});
+
+function embedUrl(id) {
+  return "https://iframe.mediadelivery.net/embed/" + LIBRARY + "/" + id + "?" + QS;
+}
+
+function loadWatched() {
+  try { return new Set(JSON.parse(localStorage.getItem(STORE_KEY) || "[]")); }
+  catch (e) { return new Set(); }
+}
+function saveWatched(s) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(Array.from(s))); } catch (e) {}
+}
+
+var watched = loadWatched();
+var current = 0;
+
+// ---- dung sidebar ----
+var nav = document.getElementById("nav");
+COURSE.forEach(function (p, pi) {
+  var sec = document.createElement("section");
+  sec.className = "part";
+  var h = document.createElement("h2");
+  h.textContent = p.part;
+  sec.appendChild(h);
+
+  var ol = document.createElement("ol");
+  FLAT.filter(function (v) { return v.pi === pi; }).forEach(function (v) {
+    var li = document.createElement("li");
+    li.dataset.idx = v.i;
+    li.dataset.search = (v.title + " " + v.part).toLowerCase();
+
+    var b = document.createElement("button");
+    b.type = "button";
+    var tick = document.createElement("span"); tick.className = "tick";
+    var label = document.createElement("span"); label.className = "label"; label.textContent = v.title;
+    var dur = document.createElement("span"); dur.className = "dur"; dur.textContent = v.mins + "′";
+    b.append(tick, label, dur);
+    b.onclick = function () { play(v.i); };
+
+    li.appendChild(b);
+    ol.appendChild(li);
+  });
+  sec.appendChild(ol);
+  nav.appendChild(sec);
+});
+var items = Array.prototype.slice.call(nav.querySelectorAll("li"));
+
+function paint() {
+  items.forEach(function (li) {
+    var i = +li.dataset.idx;
+    var on = watched.has(FLAT[i].id);
+    li.dataset.done = on ? "1" : "0";
+    li.querySelector(".tick").textContent = on ? "✓" : "○";
+    li.querySelector("button").setAttribute("aria-current", i === current ? "true" : "false");
+  });
+  var n = watched.size, t = FLAT.length;
+  document.getElementById("ptext").textContent = n + "/" + t + " đã xem";
+  document.getElementById("pbar").style.width = (t ? (n / t) * 100 : 0) + "%";
+  document.getElementById("done").textContent =
+    watched.has(FLAT[current].id) ? "✓ Bỏ dấu đã xem" : "✓ Đánh dấu đã xem";
+}
+
+function play(i, push) {
+  current = Math.max(0, Math.min(FLAT.length - 1, i));
+  var v = FLAT[current];
+  document.getElementById("player").src = embedUrl(v.id);
+  document.getElementById("nowTitle").textContent = v.title;
+  document.getElementById("nowSub").textContent =
+    v.part + "  ·  ~" + v.mins + " phút  ·  bài " + (current + 1) + "/" + FLAT.length;
+  try { localStorage.setItem(LAST_KEY, v.id); } catch (e) {}
+  if (push !== false) history.replaceState(null, "", "#" + v.id);
+  paint();
+  items[current].scrollIntoView({ block: "nearest" });
+}
+
+document.getElementById("prev").onclick = function () { play(current - 1); };
+document.getElementById("next").onclick = function () { play(current + 1); };
+document.getElementById("done").onclick = function () {
+  var id = FLAT[current].id;
+  if (watched.has(id)) { watched.delete(id); } else { watched.add(id); }
+  saveWatched(watched);
+  paint();
+};
+document.getElementById("open").onclick = function () {
+  window.open(embedUrl(FLAT[current].id), "_blank", "noopener");
+};
+document.getElementById("copy").onclick = function (e) {
+  var btn = e.currentTarget;
+  navigator.clipboard.writeText(embedUrl(FLAT[current].id)).then(
+    function () { btn.textContent = "Đã chép ✓"; },
+    function () { btn.textContent = "Không chép được"; }
+  );
+  setTimeout(function () { btn.textContent = "Sao chép link"; }, 1600);
+};
+document.getElementById("reset").onclick = function () {
+  if (!confirm("Xoá toàn bộ dấu đã xem?")) return;
+  watched = new Set();
+  saveWatched(watched);
+  paint();
+};
+document.getElementById("theme").onclick = function () {
+  var cur = document.documentElement.getAttribute("data-theme");
+  var sysDark = matchMedia("(prefers-color-scheme: dark)").matches;
+  var next = cur ? (cur === "dark" ? "light" : "dark") : (sysDark ? "light" : "dark");
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+};
+try {
+  var savedTheme = localStorage.getItem(THEME_KEY);
+  if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+} catch (e) {}
+
+var q = document.getElementById("q");
+function filterList() {
+  var s = q.value.trim().toLowerCase();
+  items.forEach(function (li) {
+    li.hidden = !!s && li.dataset.search.indexOf(s) === -1;
+  });
+  Array.prototype.forEach.call(nav.querySelectorAll(".part"), function (sec) {
+    sec.hidden = !Array.prototype.some.call(sec.querySelectorAll("li"), function (li) { return !li.hidden; });
+  });
+}
+q.oninput = filterList;
+
+addEventListener("keydown", function (e) {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.tagName === "INPUT") {
+    if (e.key === "Escape") { q.value = ""; filterList(); q.blur(); }
+    return;
+  }
+  if (e.key === "/") { e.preventDefault(); q.focus(); }
+  else if (e.key === "j" || e.key === "J") play(current + 1);
+  else if (e.key === "k" || e.key === "K") play(current - 1);
+  else if (e.key === "m" || e.key === "M") document.getElementById("done").click();
+});
+
+(function boot() {
+  var totalMin = FLAT.reduce(function (a, v) { return a + v.mins; }, 0);
+  document.getElementById("hdrmeta").textContent =
+    COURSE.length + " phần · " + FLAT.length + " bài · ~" + Math.round(totalMin / 60) + " giờ";
+
+  var want = location.hash.slice(1);
+  if (!want) { try { want = localStorage.getItem(LAST_KEY) || ""; } catch (e) { want = ""; } }
+  var at = -1;
+  for (var i = 0; i < FLAT.length; i++) { if (FLAT[i].id === want) { at = i; break; } }
+  play(at >= 0 ? at : 0, false);
+})();
+
+// ---- chan doan ket noi ----
+(function diagnose() {
+  var rows = [];
+  function add(state, label, note) { rows.push({ state: state, label: label, note: note }); }
+
+  var isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  add(location.protocol === "https:" || isLocal ? "ok" : (location.protocol === "file:" ? "bad" : "warn"),
+      "Giao thức",
+      location.protocol === "file:"
+        ? "Đang mở bằng file:// — DRM Widevine sẽ bị chặn. Chạy qua http://localhost, xem hướng dẫn bên dưới."
+        : location.protocol + "//" + location.host);
+
+  add(window.isSecureContext ? "ok" : "bad", "Secure context",
+      window.isSecureContext ? "đạt — DRM được phép chạy"
+                             : "không đạt — bắt buộc dùng https:// hoặc http://localhost");
+
+  // Request anh thumbnail la phep thu DNS/firewall nhe nhat toi CDN video.
+  var cdnCheck = new Promise(function (res) {
+    var img = new Image();
+    var t = setTimeout(function () { res(false); }, 8000);
+    img.onload = function () { clearTimeout(t); res(true); };
+    img.onerror = function () { clearTimeout(t); res(false); };
+    img.src = "https://" + CDN_ZONE + "/" + FLAT[0].id + "/thumbnail.jpg?cb=" + Math.floor(performance.now());
+  });
+
+  var drmCheck = !navigator.requestMediaKeySystemAccess
+    ? Promise.resolve({ ok: false, note: "Trình duyệt không hỗ trợ EME" })
+    : navigator.requestMediaKeySystemAccess("com.widevine.alpha", [{
+        initDataTypes: ["cenc"],
+        videoCapabilities: [{ contentType: 'video/mp4;codecs="avc1.42E01E"' }]
+      }]).then(
+        function () { return { ok: true, note: "Widevine sẵn sàng" }; },
+        function (err) { return { ok: false, note: err.name + ": " + err.message }; }
+      );
+
+  Promise.all([cdnCheck, drmCheck]).then(function (r) {
+    var cdnOk = r[0], drm = r[1];
+
+    add(cdnOk ? "ok" : "bad", "CDN video",
+        cdnOk ? CDN_ZONE + " truy cập được"
+              : "KHÔNG tới được " + CDN_ZONE + " — DNS hoặc firewall đang chặn. Đây là nguyên nhân phổ biến nhất khiến player đen.");
+    add(drm.ok ? "ok" : "bad", "DRM", drm.note);
+
+    var tbody = document.querySelector("#diagtbl tbody");
+    tbody.innerHTML = "";
+    rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      var td1 = document.createElement("td");
+      td1.className = "s-" + row.state;
+      td1.textContent = row.state === "ok" ? "✓ OK" : (row.state === "warn" ? "! Lưu ý" : "✗ Lỗi");
+      var td2 = document.createElement("td");
+      var strong = document.createElement("div"); strong.textContent = row.label;
+      var note = document.createElement("div"); note.className = "note"; note.textContent = row.note;
+      td2.append(strong, note);
+      tr.append(td1, td2);
+      tbody.appendChild(tr);
+    });
+
+    if (rows.some(function (x) { return x.state === "bad"; })) {
+      document.getElementById("diag").open = true;
+      var b = document.getElementById("banner");
+      b.className = "banner show";
+      b.textContent = "Phát hiện vấn đề kết nối — mở mục “Chẩn đoán kết nối” bên dưới để xem cách khắc phục.";
+    }
+
+    var fix = document.getElementById("diagfix");
+    fix.textContent = "";
+    function para(html) { var p = document.createElement("p"); p.className = "note"; p.innerHTML = html; fix.appendChild(p); }
+    function code(text) { var pre = document.createElement("pre"); pre.textContent = text; fix.appendChild(pre); }
+
+    if (!cdnOk) {
+      para("<strong>Khắc phục CDN bị chặn</strong> — thử theo thứ tự:");
+      para("1. Bật DNS-over-HTTPS trong Chrome: <code>chrome://settings/security</code> → <em>Use secure DNS</em> → <em>With: Google (Public DNS)</em>. Không cần quyền Admin.");
+      para("2. Đổi DNS toàn máy — PowerShell quyền Administrator:");
+      code("Get-NetAdapter | Where-Object Status -eq 'Up'\n" +
+           "Set-DnsClientServerAddress -InterfaceAlias 'Wi-Fi' -ServerAddresses 8.8.8.8,1.1.1.1\n" +
+           "Clear-DnsClientCache\n" +
+           "Resolve-DnsName " + CDN_ZONE);
+    } else if (location.protocol === "file:") {
+      para("<strong>Chạy qua HTTP server</strong> — bắt buộc để DRM hoạt động:");
+      code("cd D:\\Git\\VN-VALUE\\Docs\n" +
+           "python -m http.server 8000\n" +
+           "# mo http://localhost:8000/video-course.html");
+    }
+  });
+})();
+</script>
+</body>
+</html>
