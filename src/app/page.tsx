@@ -32,7 +32,12 @@ export default function Home() {
         }
       `}</style>
       <section style={{ position: "relative" }}>
-        <NoteWall mode="public" noteFont={config.noteFont} defaultNoteColor={config.defaultNoteColor} layoutMode={config.layoutMode} />
+        <NoteWall
+          mode="public"
+          noteFont={config.noteFont}
+          defaultNoteColor={config.defaultNoteColor}
+          layoutMode={config.layoutMode}
+        />
       </section>
 
       {/* Settings tab */}
@@ -43,14 +48,17 @@ export default function Home() {
         aria-label="Open public wall settings"
       >
         <span className="settings-tab-pin" aria-hidden="true" />
-        <Settings size={13} strokeWidth={2.5} className="settings-tab-icon" />
+        <Settings size={20} strokeWidth={2.5} className="settings-tab-icon" />
         <span className="settings-tab-label hidden sm:inline">Settings</span>
       </button>
 
       {showSettings && (
         <PublicSettings
           config={config}
-          onSave={(newConfig) => { setConfig(newConfig); setShowSettings(false) }}
+          onSave={(newConfig) => {
+            setConfig(newConfig)
+            setShowSettings(false)
+          }}
           onClose={() => setShowSettings(false)}
         />
       )}
