@@ -51,6 +51,10 @@ export const BG_PRESETS: Record<string, { label: string; css: string }> = {
     label: "Pastel Blue",
     css: "linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%)",
   },
+  fridge: {
+    label: "Cánh tủ lạnh",
+    css: "radial-gradient(circle at 50% 20%, #ffffff 0%, #f1f5f9 40%, #e2e8f0 80%, #cbd5e1 100%)",
+  },
 }
 
 const STORAGE_KEY = "privateWallConfig"
