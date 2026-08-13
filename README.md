@@ -12,13 +12,20 @@ Built with the modern web stack, this project features real-time updates, glassm
   - **Notifications**: Get notified on Telegram whenever someone leaves a note.
   - **Create via Bot**: Send a message directly to your Telegram Bot, and it will automatically be posted on the wall!
 - **Modern Design**: Built with Tailwind CSS v4, featuring aesthetic backgrounds, glass panels, and smooth animations.
+- **Progressive Web App (PWA)**: Installable on mobile and desktop, providing a native app-like experience.
+- **Local Storage**: IndexedDB support powered by Dexie.js.
+- **QR Code Sharing & Scanning**: Easily share the wall with others via built-in QR Code generation and scanning.
+- **Private Settings Protection**: Secure sensitive configurations like Telegram and Supabase keys behind a PIN lock.
 
 ## 🛠️ Tech Stack
 
 - **Framework**: [Next.js 15+ (App Router)](https://nextjs.org/)
+- **Core**: [React 19](https://react.dev/) (with React Compiler)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 - **Database & Realtime**: [Supabase](https://supabase.com/)
-- **State Management**: [React Query](https://tanstack.com/query/latest)
+- **State Management**: [React Query](https://tanstack.com/query/latest) & [Dexie.js](https://dexie.org/)
+- **PWA**: [@ducanh2912/next-pwa](https://github.com/ducanh-2912/next-pwa)
+- **QR Utilities**: `html5-qrcode` & `qrcode`
 - **Icons**: [Lucide React](https://lucide.dev/)
 
 ## 🚀 Getting Started
