@@ -1,22 +1,11 @@
 import { NextResponse } from 'next/server';
+import { escapeHtml, sendTelegramMessage } from './telegramUtils';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
-
-    if (!botToken || !chatId) {
-      return NextResponse.json({ error: 'Telegram config missing' }, { status: 500 });
-    }
-
-    const escapeHtml = (text: string) => {
-      if (!text) return '';
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    };
 
     let message = '';
     let reply_markup: any = undefined;
@@ -59,23 +48,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid message type' }, { status: 400 });
     }
 
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: 'HTML',
-        reply_markup: reply_markup,
-      }),
-    });
+    const success = await sendTelegramMessage(botToken, chatId, message, reply_markup);
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Telegram API Error Data:', errorData);
-      throw new Error(`Telegram API Error: ${response.statusText}`);
+    if (!success) {
+      return NextResponse.json({ error: 'Failed to send notification' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
