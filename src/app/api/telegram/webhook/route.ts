@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
       // Command handling
       if (text.startsWith('/')) {
-        const commandStr = text.split(' ')[0].toLowerCase();
+        const commandStr = text.split(/\s+/)[0].toLowerCase();
         const command = commandStr.split('@')[0];
         
         switch (command) {
