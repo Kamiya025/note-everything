@@ -129,7 +129,7 @@ export function PinLock({ onUnlock }: PinLockProps) {
           align-items: center;
           justify-content: center;
           padding: 1rem;
-          background-image: url('/bg-wall.png');
+          background-image: url('/bg-wall.webp');
           background-size: cover;
           background-position: center;
           background-color: #eab308;

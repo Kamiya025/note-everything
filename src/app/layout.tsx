@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from 'next'
+import { Outfit } from 'next/font/google'
 import './globals.css'
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-outfit',
+})
 
 export const metadata: Metadata = {
   title: 'Wall of Notes',
@@ -23,7 +30,7 @@ export const viewport: Viewport = {
   themeColor: '#facc15',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
 }
 
 import Providers from './providers'
@@ -35,8 +42,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={outfit.variable}>
+      <body className={outfit.className}>
         <Providers>{children}</Providers>
         <InstallPWA />
       </body>

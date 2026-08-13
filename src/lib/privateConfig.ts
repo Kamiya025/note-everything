@@ -37,7 +37,7 @@ export const NOTE_FONTS: Record<NoteFontKey, { label: string; css: string }> = {
 export const BG_PRESETS: Record<string, { label: string; css: string }> = {
   yellow_wall: {
     label: "Yellow Wall",
-    css: "url('/bg-wall.png') center/cover",
+    css: "url('/bg-wall.webp') center/cover",
   },
   cork: {
     label: "Cork Board",

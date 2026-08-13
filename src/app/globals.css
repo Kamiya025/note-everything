@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
 :root {
@@ -25,7 +25,7 @@ body {
   margin: 0;
   padding: 0;
   /* Vietnamese Old Yellow Wall Background */
-  background-image: url('/bg-wall.png');
+  background-image: url('/bg-wall.webp');
   background-size: cover;
   background-position: center;
   background-color: #eab308; /* Fallback yellow */
