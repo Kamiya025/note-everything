@@ -6,6 +6,8 @@ export const escapeHtml = (text: string) => {
     .replace(/>/g, '&gt;');
 };
 
+export const TELEGRAM_API_URL = 'https://api.telegram.org';
+
 export const sendTelegramMessage = async (
   botToken: string | undefined,
   chatId: string | number | undefined,
@@ -28,7 +30,7 @@ export const sendTelegramMessage = async (
   }
 
   try {
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const response = await fetch(`${TELEGRAM_API_URL}/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
